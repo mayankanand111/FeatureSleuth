@@ -13,14 +13,16 @@ class LoadData:
     def Load_Data():
         file_reader = gzip.open(LoadData.file_path, 'r')
         file_reader.read(16)
-        buf = file_reader.read(28 * 28 * 1)
+        buf = file_reader.read(28 * 28 * 60000)
         train_data = np.frombuffer(buf, dtype=np.uint8).astype(np.float32)
+        train_data = train_data.reshape(60000, 28 * 28)
         # print('demo')
         return train_data
 
     def PrintImage(data):
         image = im.fromarray(np.reshape(data, (28, 28)), mode=None)
-        image.show()
+        # image.show()
+        return image
 
     def __call__(self, ):
         return self.Load_Data()
