@@ -9,16 +9,16 @@ class LoadData:
     def __init__(self):
         self
 
-    def Load_TrainData():
-        file_reader = gzip.open('../featuresleuth/MNISTDataset/MNIST_train_data.gz', 'r')
+    def Load_TrainData(path):
+        file_reader = gzip.open(path, 'r')
         file_reader.read(16)
         buf = file_reader.read(28 * 28 * 60000)
         train_data = np.frombuffer(buf, dtype=np.uint8).astype(np.int32)
         train_data = np.reshape(train_data,(60000,784))
         return train_data
 
-    def Load_TrainDataLabels():
-        file_reader = gzip.open('../featuresleuth/MNISTDataset/MNIST_train_labels.gz', 'r')
+    def Load_TrainDataLabels(path):
+        file_reader = gzip.open(path, 'r')
         buf = file_reader.read()
         train_data = np.frombuffer(buf, dtype=np.uint8,offset=8)
         return train_data

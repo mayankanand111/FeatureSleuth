@@ -91,13 +91,25 @@
 # def calculate_euclidean(a1, a2):
 #     return np.sqrt(np.sum((a1 - a2) ** 2))
 
+import hydra
+from hydra.core.config_store  import ConfigStore
+
+from Conf import DataConfig
+from Conf.DataConfig import MNISTConfig
 from Research.DataAnalysis import LoadData
 
-if __name__ == '__main__':
-    train_data = LoadData.Load_TrainData()
-    train_data_labels = LoadData.Load_TrainDataLabels()
+cs = ConfigStore.instance()
+cs.store(name="mnsit_config",node=MNISTConfig)
+
+@hydra.main(config_path="Conf", config_name="DataConfig")
+def main(cfg: MNISTConfig) -> None:
+    train_data = LoadData.Load_TrainData(cfg.params.train_data_path)
+    train_data_labels = LoadData.Load_TrainDataLabels(cfg.params.train_labels_path)
     digits_list = LoadData.get_seperate_digits(train_data,train_data_labels)
     centroid_list = LoadData.find_digits_average(digits_list)
     eucledian_datalist = LoadData.find_euclediandistance(centroid_list,digits_list)
     LoadData.get_mostdifferent_images(eucledian_datalist)
     print('test')
+
+if __name__ == "__main__":
+    main()
