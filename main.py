@@ -90,7 +90,10 @@
 #
 # def calculate_euclidean(a1, a2):
 #     return np.sqrt(np.sum((a1 - a2) ** 2))
+import matplotlib.pyplot as plt
+import numpy
 
+from DataLoader import Loader
 import hydra
 from hydra.core.config_store  import ConfigStore
 
@@ -110,6 +113,16 @@ def main(cfg: MNISTConfig) -> None:
     eucledian_datalist = LoadData.find_euclediandistance(centroid_list,digits_list)
     LoadData.get_mostdifferent_images(eucledian_datalist)
     print('test')
+
+# testing loader will be removed later
+
+    train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path,cfg.params.train_labels_path,64)
+    dataiter = iter(train_loader)
+    data = dataiter.next()
+    features, labels = data
+    print(features, labels)
+
+
 
 if __name__ == "__main__":
     main()
