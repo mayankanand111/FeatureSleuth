@@ -106,23 +106,23 @@ cs.store(name="mnsit_config",node=MNISTConfig)
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def main(cfg: MNISTConfig) -> None:
-    train_data = LoadData.Load_TrainData(cfg.params.train_data_path)
-    train_data_labels = LoadData.Load_TrainDataLabels(cfg.params.train_labels_path)
-    digits_list = LoadData.get_seperate_digits(train_data,train_data_labels)
-    centroid_list = LoadData.find_digits_average(digits_list)
-    eucledian_datalist = LoadData.find_euclediandistance(centroid_list,digits_list)
-    LoadData.get_mostdifferent_images(eucledian_datalist)
-    print('test')
+    # train_data = LoadData.Load_TrainData(cfg.params.train_data_path)
+    # train_data_labels = LoadData.Load_TrainDataLabels(cfg.params.train_labels_path)
+    # digits_list = LoadData.get_seperate_digits(train_data,train_data_labels)
+    # centroid_list = LoadData.find_digits_average(digits_list)
+    # eucledian_datalist = LoadData.find_euclediandistance(centroid_list,digits_list)
+    # LoadData.get_mostdifferent_images(eucledian_datalist)
+    # print('test')
 
 # testing loader will be removed later
 
-    train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path,cfg.params.train_labels_path,64)
-    dataiter = iter(train_loader)
-    data = dataiter.next()
-    features, labels = data
-    print(features, labels)
+    train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path,cfg.params.train_labels_path,cfg.hyperparams.batch_size)
+    test_loader = Loader.Test_Loader.load_test_dataset(cfg.params.test_data_path,cfg.params.test_labels_path,cfg.hyperparams.batch_size)
+    list = []
+    for images,labels in test_loader:
+        list.append(images)
 
-
+    print("z")
 
 if __name__ == "__main__":
     main()

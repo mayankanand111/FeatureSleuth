@@ -53,3 +53,23 @@ class Train_Loader:
 
         train_loader = DataLoader(train_data, batch_size, shuffle=True)
         return train_loader
+
+class Test_Loader:
+    def __init__(self):
+        self
+
+    def load_test_dataset(datapath, labelpath, batch_size):
+        file_reader = gzip.open(datapath, 'r')
+        file_reader.read(16)
+        buf = file_reader.read(28 * 28 * 10000)
+        test_data_images = np.frombuffer(buf, dtype=np.uint8).astype(np.int32)
+        test_data_images = np.reshape(test_data_images, (10000, 784))
+
+        file_reader = gzip.open(labelpath, 'r')
+        buf = file_reader.read()
+        test_label = np.frombuffer(buf, dtype=np.uint8, offset=8)
+
+        test_data = MNISTDataset(test_data_images, test_label, transform)
+
+        test_loader = DataLoader(test_data, batch_size, shuffle=True)
+        return test_loader
