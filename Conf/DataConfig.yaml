@@ -5,4 +5,7 @@ params:
   test_labels_path: ${hydra:runtime.cwd}\MNISTDataset\t10k-labels-idx1-ubyte.gz
 
 hyperparams:
-  batch_size: 512
+  batch_size: 128
+  epochs: 5
+  learning_rate: 0.0001
+  optimizer: 'SGD'

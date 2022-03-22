@@ -30,9 +30,9 @@ class MNISTDataset(Dataset):
             data = self.transforms(data)
 
         if self.y is not None:
-            return (data, self.y[i])
+            return (data.float(), self.y[i])
         else:
-            return data
+            return data.float()
 
 
 class Train_Loader:

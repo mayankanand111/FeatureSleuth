@@ -10,6 +10,9 @@ class params:
 @dataclass
 class hyperparams:
     batch_size: int
+    epochs: int
+    learning_rate: float
+    optimizer: str
 
 @dataclass
 class MNISTConfig:
