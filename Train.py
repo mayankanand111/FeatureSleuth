@@ -1,4 +1,5 @@
 import Models.model
+import torch
 from DataLoader import Loader
 import hydra
 from hydra.core.config_store  import ConfigStore
@@ -23,6 +24,10 @@ def main(cfg: MNISTConfig) -> None:
 
     #calling Training Loop
     TrainLoop.Tloop(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
+
+    # Saving model trained weights
+    path = cfg.params.pretrain_model_path
+    torch.save(model.state_dict(), path+model.__class__.__name__)
 
 if __name__ == "__main__":
     main()

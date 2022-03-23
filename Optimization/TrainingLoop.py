@@ -13,7 +13,7 @@ class TrainLoop():
         loss_criterion = nn.NLLLoss()
 
         #selectinf type of optimizer
-        if optimizer == 'Adam':
+        if optimizer == 'ADAM':
             optimizer = torch.optim.Adam(model.parameters(),learning_rate)
         elif optimizer == 'SGD':
             optimizer = torch.optim.SGD(model.parameters(), learning_rate)
@@ -40,4 +40,5 @@ class TrainLoop():
 
         # Plotting Loss Curve
         LossCurve.PlotCurve(loss_values,epochs)
+
 

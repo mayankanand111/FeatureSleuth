@@ -6,6 +6,7 @@ class params:
     train_labels_path: str
     test_data_path: str
     test_labels_path: str
+    pretrain_model_path: str
 
 @dataclass
 class hyperparams:
@@ -17,3 +18,4 @@ class hyperparams:
 @dataclass
 class MNISTConfig:
     params: params
+    hyperparams: hyperparams
