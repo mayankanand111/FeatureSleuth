@@ -8,7 +8,7 @@ class TrainLoop():
     def __init__(self):
         self
 
-    def Tloop(model,epochs,optimizer,learning_rate,train_loader,test_loader):
+    def Tloop(model,epochs,optimizer,learning_rate,train_loader,test_loader,cloned_model=None):
         #loss criteria
         loss_criterion = nn.NLLLoss()
 
@@ -36,7 +36,11 @@ class TrainLoop():
             loss_values.append(running_loss / len(train_loader))
 
             #evaluation of model on test data
-            Evaluation.Eval(model,epoch,test_loader)
+            if (cloned_model == None):
+                Evaluation.Eval(model,epoch,test_loader)
+            else:
+                cloned_model.load_state_dict(model.state_dict()) # this is recquired so that new weights are tranfered testing
+                Evaluation.Eval(cloned_model, epoch, test_loader)
 
         # Plotting Loss Curve
         LossCurve.PlotCurve(loss_values,epochs)

@@ -24,7 +24,7 @@ class MNISTDataset(Dataset):
 
     def __getitem__(self, i):
         data = self.X[i]
-        data = np.asarray(data).reshape(28, 28)
+        data = np.asarray(data)
 
         if self.transforms:
             data = self.transforms(data)
@@ -34,6 +34,23 @@ class MNISTDataset(Dataset):
         else:
             return data.float()
 
+class FeatureDataset(Dataset):
+    def __init__(self, images, labels=None, transforms=None):
+        self.X = images
+        self.y = labels
+        self.transforms = transforms
+
+    def __len__(self):
+        return (len(self.X))
+
+    def __getitem__(self, i):
+        data = self.X[i]
+        data = np.asarray(data)
+
+        if self.y is not None:
+            return (data, self.y[i])
+        else:
+            return data
 
 class Train_Loader:
     def __init__(self):
@@ -43,7 +60,7 @@ class Train_Loader:
         file_reader.read(16)
         buf = file_reader.read(28 * 28 * 60000)
         train_data_images = np.frombuffer(buf, dtype=np.uint8).astype(np.int32)
-        train_data_images = np.reshape(train_data_images, (60000, 784))
+        train_data_images = np.reshape(train_data_images, (60000, 28,28))
 
         file_reader = gzip.open(labelpath, 'r')
         buf = file_reader.read()
@@ -63,7 +80,7 @@ class Test_Loader:
         file_reader.read(16)
         buf = file_reader.read(28 * 28 * 10000)
         test_data_images = np.frombuffer(buf, dtype=np.uint8).astype(np.int32)
-        test_data_images = np.reshape(test_data_images, (10000, 784))
+        test_data_images = np.reshape(test_data_images, (10000, 28,28))
 
         file_reader = gzip.open(labelpath, 'r')
         buf = file_reader.read()
@@ -73,3 +90,12 @@ class Test_Loader:
 
         test_loader = DataLoader(test_data, batch_size, shuffle=True)
         return test_loader
+
+class Feature_loader:
+    def __init__(self):
+        self
+
+    def create_feature_loader(train_images,train_labels,batch_size):
+        feature_data = FeatureDataset(train_images,train_labels)
+        feature_loader = DataLoader(feature_data,batch_size,shuffle=True)
+        return feature_loader

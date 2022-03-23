@@ -6,7 +6,7 @@ params:
   pretrain_model_path: ${hydra:runtime.cwd}\TrainedModels\
 
 hyperparams:
-  batch_size: 128
-  epochs: 1
-  learning_rate: 0.0001
-  optimizer: 'ADAM'
+  batch_size: 64
+  epochs: 5
+  learning_rate: 0.01
+  optimizer: 'SGD'
