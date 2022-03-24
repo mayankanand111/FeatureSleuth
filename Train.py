@@ -3,7 +3,7 @@ import torch
 from DataLoader import Loader
 import hydra
 from hydra.core.config_store  import ConfigStore
-from Models.model import BaseModel
+from Models.model import BaseModel,ThreeLayerModel
 from Optimization.TrainingLoop import TrainLoop
 from Conf import DataConfig
 from Conf.DataConfig import MNISTConfig
@@ -20,7 +20,7 @@ def main(cfg: MNISTConfig) -> None:
     test_loader = Loader.Test_Loader.load_test_dataset(cfg.params.test_data_path,cfg.params.test_labels_path,cfg.hyperparams.batch_size)
 
     # creating model
-    model = BaseModel()
+    model = ThreeLayerModel()
 
     #calling Training Loop
     TrainLoop.Tloop(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)

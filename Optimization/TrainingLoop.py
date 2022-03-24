@@ -39,7 +39,7 @@ class TrainLoop():
             if (cloned_model == None):
                 Evaluation.Eval(model,epoch,test_loader)
             else:
-                cloned_model.load_state_dict(model.state_dict()) # this is recquired so that new weights are tranfered testing
+                cloned_model.load_state_dict(model.state_dict()) # this is recquired so that new weights are tranfered for testing
                 Evaluation.Eval(cloned_model, epoch, test_loader)
 
         # Plotting Loss Curve

@@ -4,7 +4,7 @@ import hydra
 from hydra.core.config_store  import ConfigStore
 
 from FeatureExtracter.FeatureMapsExtract import FmapExtract
-from Models.model import BaseModel,BaseModelFeatureMap
+from Models.model import BaseModel,BaseModelFeatureMap,ThreeLayerModel,ThreeLayerModelFeatureMap
 from Optimization.TrainingLoop import TrainLoop
 from Conf import DataConfig
 from Conf.DataConfig import MNISTConfig
@@ -24,8 +24,8 @@ def main(cfg: MNISTConfig) -> None:
     test_loader = Loader.Test_Loader.load_test_dataset(cfg.params.test_data_path,cfg.params.test_labels_path,cfg.hyperparams.batch_size)
 
     # creating model
-    loaded_model = BaseModelFeatureMap()
-    model_to_clone = BaseModel()
+    loaded_model = ThreeLayerModelFeatureMap()
+    model_to_clone = ThreeLayerModel()
     #assigning weights from pre trained model
     path = cfg.params.pretrain_model_path
     loaded_model.load_state_dict(torch.load(path+model_to_clone.__class__.__name__))
@@ -43,7 +43,7 @@ def main(cfg: MNISTConfig) -> None:
     #     list.append(images)
 
     # calling Training Loop
-    TrainLoop.Tloop(loaded_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer, cfg.hyperparams.learning_rate,
+    TrainLoop.Tloop(loaded_model, 1, cfg.hyperparams.optimizer, cfg.hyperparams.learning_rate,
                     feature_loader, test_loader,model_to_clone)
 
     # Saving model trained weights

@@ -4,7 +4,7 @@ class Evaluation():
     def __init__(self):
         self
 
-    def Eval(model,epoch,test_loader):
+    def Eval(model,epoch,test_loader,is_only_test=False):
         with torch.no_grad():
             model.eval()
             correct_samples = 0
@@ -15,4 +15,12 @@ class Evaluation():
                 total_samples += labels.size(0)
                 correct_samples += (pred_labels == labels).sum().item()
             accuracy = (correct_samples / total_samples) * 100
-            print('Accuracy after ', epoch + 1, ' epochs : ', accuracy)
+            loader_type = ""
+            if(is_only_test):
+                if(total_samples >10000):
+                    loader_type = "train set"
+                else:
+                    loader_type = "test set"
+                print('Accuracy on {loader_type}: '.format(loader_type=loader_type), accuracy)
+            else:
+                print('Accuracy after ', epoch + 1, ' epochs : ', accuracy)
