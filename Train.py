@@ -20,7 +20,7 @@ def main(cfg: MNISTConfig) -> None:
     test_loader = Loader.Test_Loader.load_test_dataset(cfg.params.test_data_path,cfg.params.test_labels_path,cfg.hyperparams.batch_size)
 
     # creating model
-    model = ThreeLayerModel()
+    model = BaseModel()
 
     #calling Training Loop
     TrainLoop.Tloop(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)

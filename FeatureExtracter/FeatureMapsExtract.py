@@ -31,14 +31,12 @@ class FmapExtract:
 
         processed = []
         for feature_map in outputs:
-            feature_map = feature_map.squeeze(1)
-            gray_scale = torch.sum(feature_map, 1)
-            gray_scale = gray_scale / feature_map.shape[1]
-            processed.append(gray_scale.data.cpu())
+            for f in range(feature_map.size()[1]):
+                processed.append(feature_map[0][f])
 
         feature_map_image = []
         for i in range(len(processed)):
-            feature_map_image = processed[i]
+            feature_map_image.append(processed[i])
 
         return feature_map_image
 
@@ -46,9 +44,11 @@ class FmapExtract:
         train_feature_maps = []
         train_labels = []
         for images, labels in input_loader:
-            train_labels.append(labels.item())
-            train_feature_maps.append(FmapExtract.extract_featuremaps(images,model))
-        feature_list = []
-        for i in train_feature_maps:
-            feature_list.append(torch.tensor(i.reshape(1, 24, 24)))
-        return np.array(feature_list), np.array(train_labels, dtype=np.uint8)
+            ExtractedFmaplist = FmapExtract.extract_featuremaps(images,model)
+            for fmap in range(len(ExtractedFmaplist)):
+                train_feature_maps.append(ExtractedFmaplist[fmap].detach().reshape(1, 24, 24))
+                train_labels.append(labels.item())
+        # feature_list = []
+        # for i in train_feature_maps:
+        #     feature_list.append(torch.tensor(i.reshape(1, 24, 24)))
+        return np.array(train_feature_maps), np.array(train_labels, dtype=np.uint8)

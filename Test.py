@@ -26,13 +26,18 @@ def main(cfg: MNISTConfig) -> None:
     model_to_clone = BaseModelFeatureMap()  # in this use model that you want to clone
     #assigning weights from pre trained model
     path = cfg.params.pretrain_model_path
-    #loaded_model.load_state_dict(torch.load(path+model_to_clone.__class__.__name__))
+    loaded_model.load_state_dict(torch.load(path+model_to_clone.__class__.__name__))
 
-    state_dict = torch.load(path+model_to_clone.__class__.__name__)
-    with torch.no_grad():
-        loaded_model.conv1.weight.copy_(state_dict['conv1.weight'])
-        loaded_model.conv1.bias.copy_(state_dict['conv1.bias'])
-
+    # state_dict = torch.load(path+model_to_clone.__class__.__name__)
+    # with torch.no_grad():
+        # loaded_model.conv1.weight.copy_(state_dict['conv1.weight'])
+        # loaded_model.conv1.bias.copy_(state_dict['conv1.bias'])
+        # loaded_model.conv2.weight.copy_(state_dict['conv2.weight'])
+        # loaded_model.conv2.bias.copy_(state_dict['conv2.bias'])
+        # loaded_model.fc1.weight.copy_(state_dict['fc1.weight'])
+        # loaded_model.fc1.bias.copy_(state_dict['fc1.bias'])
+        # loaded_model.fc2.weight.copy_(state_dict['fc2.weight'])
+        # loaded_model.fc2.bias.copy_(state_dict['fc2.bias'])
     print("-----------------Testing on {} model------------------".format(model_to_clone.__class__.__name__))
     # calling Eval function to test trained model
     Evaluation.Eval(loaded_model, 1, train_loader,True) # keep epoch 1 as we want to test only once on whole dataset
