@@ -18,7 +18,7 @@ def main(cfg: MNISTConfig) -> None:
 
     #loading train loader to extract feature maps
     #keep batch size 1 here so that indivisual image comes.
-    train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path,cfg.params.train_labels_path,1)
+    train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path,cfg.params.train_labels_path,cfg.hyperparams.batch_size)
 
     #loading test loader
     test_loader = Loader.Test_Loader.load_test_dataset(cfg.params.test_data_path,cfg.params.test_labels_path,cfg.hyperparams.batch_size)
@@ -43,12 +43,12 @@ def main(cfg: MNISTConfig) -> None:
     #     list.append(images)
 
     # calling Training Loop
-    TrainLoop.Tloop(loaded_model,cfg.hyperparams.epochs, cfg.hyperparams.optimizer, cfg.hyperparams.learning_rate,
+    TrainLoop.Tloop(loaded_model,5, cfg.hyperparams.optimizer, cfg.hyperparams.learning_rate,
                     feature_loader, test_loader,model_to_clone)
 
     # Saving model trained weights
     path = cfg.params.pretrain_model_path
     torch.save(loaded_model.state_dict(), path + loaded_model.__class__.__name__)
-
+    print('Trained model : {} saved at {path}'.format(loaded_model.__class__.__name__,path=path))
 if __name__ == "__main__":
     main()

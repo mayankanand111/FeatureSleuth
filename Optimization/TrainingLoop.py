@@ -21,8 +21,11 @@ class TrainLoop():
         loss_values = []
         for epoch in range(epochs):
             running_loss = 0
+            batch_counter = 0
             for images, labels in train_loader:
                 model.train()
+                # batch_counter += 1
+                # print(batch_counter)
                 # forward pass
                 outputs = model(images)
                 # finding loss
