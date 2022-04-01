@@ -43,17 +43,37 @@ class TLoopWithExtraction():
                         newBatchFeatureMaps = feature_extractor(images)
                         # now we have feature maps of new batch and feature maps cache so far to perform cosine similarity check
                         index_hitlist = []
-                        for index in range(len(images)):
-                            matched_index = torch.argmax(F.cosine_similarity(
-                            torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3),dim=1)[index],
-                            feature_cachearr, dim=1))
-                            if(label_cachearr[matched_index].item()==labels[index].item()):
-                                #remove that image from batch
-                                successfull_cache_hits += 1
-                                cache_hits += 1
-                                index_hitlist.append(index)
-                            else:
-                                cache_hits += 1
+                        # for index in range(len(images)):
+                        #     matched_index = torch.argmax(F.cosine_similarity(
+                        #     torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3),dim=1)[index],
+                        #     feature_cachearr, dim=1))
+                        #     if(label_cachearr[matched_index].item()==labels[index].item()):
+                        #         #remove that image from batch
+                        #         successfull_cache_hits += 1
+                        #         cache_hits += 1
+                        #         index_hitlist.append(index)
+                        #     else:
+                        #         cache_hits += 1
+
+
+                        ################### Akhilesh
+
+                        Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
+
+                        Z_norm = torch.linalg.norm(Z, dim=1, keepdim=True)  # Size (n, 1).
+                        B_norm = torch.linalg.norm(feature_cachearr, dim=1, keepdim=True)  # Size (1, b).
+
+                        # Distance matrix of size (b, n).
+                        cosine_similarity = ((Z @ feature_cachearr.T) / (Z_norm @ B_norm.T)).T
+
+                        cosine_similarity = cosine_similarity.T
+                        matched_index = torch.argmax(cosine_similarity, dim=1)
+
+
+                        index_hitlist = label_cachearr[matched_index] [
+                            torch.eq(label_cachearr[matched_index] , labels)]
+
+                        ##################
 
                         #removing image from batch which got sucessfull hit in cache
                         total_indexs = torch.tensor(range(len(images)))
@@ -83,8 +103,8 @@ class TLoopWithExtraction():
                     # feature_cachearr.size()[0] * feature_cachearr.size()[1], feature_cachearr.size()[2]))
                     label_cachearr = torch.cat(label_cache).flatten()
                 running_loss += loss.item()
-            print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
-            print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
+            # print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
+            # print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
             loss_values.append(running_loss / len(train_loader))
 
             #evaluation of model on test data
