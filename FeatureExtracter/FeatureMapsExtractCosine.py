@@ -1,9 +1,16 @@
+import torch
 import torch.nn as nn
-import numpy as np
+from torchvision.models.feature_extraction import create_feature_extractor
 
 
-def get_feature_maps(conv_layer, batch_images):
-    return conv_layer(batch_images)
+def get_feature_maps(model, batch_images):
+    feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
+    newBatchFeatureMaps = feature_extractor(batch_images)
+    print(newBatchFeatureMaps.shape)
+
+    Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
+    # print(type(Z.shape))
+    return Z
 
 
 class FeatureMapExtractor:
@@ -25,13 +32,11 @@ class FeatureMapExtractor:
                             model_weights.append(child.weight)
                             conv_layers.append(child)
 
-        outputs = []
-        names = []
         featuremap_dict = {}
 
         # for index in range(len(conv_layers)):
         for index in range(1):
-            featuremap_dict[str(index)] = get_feature_maps(conv_layers[index], batch_images)
+            featuremap_dict[str(index)] = get_feature_maps(model, batch_images)
 
         # # print("output length", len(outputs))
         # processed = []

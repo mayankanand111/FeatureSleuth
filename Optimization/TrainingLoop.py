@@ -8,13 +8,13 @@ class TrainLoop():
     def __init__(self):
         self
 
-    def Tloop(model,epochs,optimizer,learning_rate,train_loader,test_loader,cloned_model=None):
-        #loss criteria
+    def Tloop(model, epochs, optimizer, learning_rate, train_loader, test_loader, cloned_model=None):
+        # loss criteria
         loss_criterion = nn.NLLLoss()
 
-        #selectinf type of optimizer
+        # selectinf type of optimizer
         if optimizer == 'ADAM':
-            optimizer = torch.optim.Adam(model.parameters(),learning_rate)
+            optimizer = torch.optim.Adam(model.parameters(), learning_rate)
         elif optimizer == 'SGD':
             optimizer = torch.optim.SGD(model.parameters(), learning_rate)
 
@@ -38,14 +38,13 @@ class TrainLoop():
                 running_loss += loss.item()
             loss_values.append(running_loss / len(train_loader))
 
-            #evaluation of model on test data
+            # evaluation of model on test data
             if (cloned_model == None):
-                Evaluation.Eval(model,epoch,test_loader)
+                Evaluation.Eval(model, epoch, test_loader)
             else:
-                cloned_model.load_state_dict(model.state_dict()) # this is recquired so that new weights are tranfered for testing
+                cloned_model.load_state_dict(
+                    model.state_dict())  # this is recquired so that new weights are tranfered for testing
                 Evaluation.Eval(cloned_model, epoch, test_loader)
 
         # Plotting Loss Curve
-        LossCurve.PlotCurve(loss_values,epochs)
-
-
+        LossCurve.PlotCurve(loss_values, epochs)

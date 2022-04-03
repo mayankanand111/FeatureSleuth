@@ -3,9 +3,10 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+
 class FmapExtract:
 
-    def extract_featuremaps(batch_images,model):
+    def extract_featuremaps(batch_images, model):
         model_weights = []
         conv_layers = []
         model_children = list(model.children())
@@ -26,12 +27,16 @@ class FmapExtract:
         outputs = []
         names = []
         for layer in conv_layers[0:1]:
+            # print(batch_images.shape)
             image = layer(batch_images)
+            # print(image.shape)
             outputs.append(image)
             names.append(str(layer))
 
+        # print("output length", len(outputs))
         processed = []
         for feature_map in outputs:
+            # print((feature_map.size()))
             for f in range(feature_map.size()[1]):
                 processed.append(feature_map[0][f])
 
@@ -41,17 +46,19 @@ class FmapExtract:
 
         return feature_map_image
 
-    def getfeatures_from_loader(input_loader,model):
+    def getfeatures_from_loader(input_loader, model):
         train_feature_maps = []
         train_labels = []
         for images, labels in input_loader:
-            ExtractedFmaplist = FmapExtract.extract_featuremaps(images,model)
+            ExtractedFmaplist = FmapExtract.extract_featuremaps(images, model)
             for fmap in range(len(ExtractedFmaplist)):
                 train_feature_maps.append(ExtractedFmaplist[fmap].detach().reshape(1, ExtractedFmaplist[fmap].size()[0], ExtractedFmaplist[fmap].size()[1]))
                 train_labels.append(labels.item())
         # feature_list = []
         # for i in train_feature_maps:
         #     feature_list.append(torch.tensor(i.reshape(1, 24, 24)))
+        # print("Inside get features from loader")
+        # print(len(train_feature_maps), len(train_labels))
         return np.array(train_feature_maps), np.array(train_labels, dtype=np.uint8)
 
     def extract_featuremaps_new(batch_images,model):
