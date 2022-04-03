@@ -10,16 +10,15 @@ class BaseModel(nn.Module):
         self.pool1 = nn.MaxPool2d(kernel_size=2)
         self.conv2 = nn.Conv2d(in_channels=15, out_channels=30, kernel_size=5)
         self.pool2 = nn.MaxPool2d(kernel_size=2)
-        self.fc1 = nn.Linear(480, 64)
-        self.dropout2 = nn.Dropout(p=0.5)
+        self.fc1 = nn.Linear(480 ,64)
         self.fc2 = nn.Linear(64 ,10)
         self.softmax = nn.LogSoftmax()
 
-    def forward(self, finput):
-        finput = F.relu(self.pool1(self.conv1(finput)))
-        finput = F.relu(self.pool2(self.conv2(finput)))
-        finput = torch.flatten(finput, start_dim=1)
-        finput = F.relu(self.fc1(finput))
+    def forward(self ,finput):
+        finput = torch.relu(self.pool1(self.conv1(finput)))
+        finput = torch.relu(self.pool2(self.conv2(finput)))
+        finput = torch.flatten(finput ,start_dim=1)
+        finput = torch.relu(self.fc1(finput))
         finput = self.fc2(finput)
         finput = self.softmax(finput)
         return finput

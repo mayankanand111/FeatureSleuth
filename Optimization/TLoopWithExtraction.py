@@ -36,18 +36,24 @@ class TLoopWithExtraction():
                 model.train()
                 batch_counter += 1
                 # if feature cache is not empty than do cosine similarity check
-                if (feature_cachearr != None):
-                    print("Current Batch is {} and fmap count is {}".format(batch_counter, len(feature_cachearr)))
-                    # first get feature maps for new batch from model trained weights till now
+                if(feature_cachearr!=None):
+                    #print("Current Batch is {} and fmap count is {}".format(batch_counter,len(feature_cachearr)))
+                    #first get feature maps for new batch from model trained weights till now
                     with torch.no_grad():
                         feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
                         newBatchFeatureMaps = feature_extractor(images)
+
                         # now we have feature maps of new batch and feature maps cache so far to perform cosine similarity check
-                        index_hitlist = []
+
+
+                        #TODO : below code have to be removed as numpy array match is implemented
+                        # index_hitlist = []
+                        # test=[]
                         # for index in range(len(images)):
                         #     matched_index = torch.argmax(F.cosine_similarity(
                         #     torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3),dim=1)[index],
                         #     feature_cachearr, dim=1))
+                        #     test.append(matched_index)
                         #     if(label_cachearr[matched_index].item()==labels[index].item()):
                         #         #remove that image from batch
                         #         successfull_cache_hits += 1
@@ -56,7 +62,7 @@ class TLoopWithExtraction():
                         #     else:
                         #         cache_hits += 1
 
-                        ################### Akhilesh
+
 
                         Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
 
@@ -69,14 +75,21 @@ class TLoopWithExtraction():
                         cosine_similarity = cosine_similarity.T
                         matched_index = torch.argmax(cosine_similarity, dim=1)
 
-                        index_hitlist = label_cachearr[matched_index][
-                            torch.eq(label_cachearr[matched_index], labels)]
+                        #TODO: below code has to be reoved as right index fix is implemented
+                        # below code gets wrong indexes in batch to remove image from batch fix is done below total indexes
+                        # index_hitlist2 = label_cachearr[matched_index2] [
+                        #     torch.eq(label_cachearr[matched_index2] , labels)]
 
-                        ##################
 
                         # removing image from batch which got sucessfull hit in cache
                         total_indexs = torch.tensor(range(len(images)))
-                        indexes_toremove = torch.tensor(index_hitlist)
+                        index_hitlist = total_indexs[torch.eq(label_cachearr[matched_index] , labels)]
+
+                        #adding cahce hits and sucessful cache hits
+                        cache_hits += label_cachearr[matched_index].shape[0]
+                        successfull_cache_hits += index_hitlist.shape[0]
+
+                        indexes_toremove = index_hitlist
                         out, c = torch.cat([total_indexs, indexes_toremove]).unique(return_counts=True)
                         indexes_tokeep = out[c == 1]
                         images = torch.index_select(images, 0, indexes_tokeep)
@@ -102,8 +115,8 @@ class TLoopWithExtraction():
                     # feature_cachearr.size()[0] * feature_cachearr.size()[1], feature_cachearr.size()[2]))
                     label_cachearr = torch.cat(label_cache).flatten()
                 running_loss += loss.item()
-            # print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
-            # print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
+            print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
+            print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
             loss_values.append(running_loss / len(train_loader))
 
             # evaluation of model on test data
