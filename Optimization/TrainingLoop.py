@@ -45,6 +45,18 @@ class TrainLoop():
                 cloned_model.load_state_dict(
                     model.state_dict())  # this is recquired so that new weights are tranfered for testing
                 Evaluation.Eval(cloned_model, epoch, test_loader)
-
+        if(epoch == len(epochs)):
+            if (cloned_model == None):
+                print("Accuracy on train set:")
+                Evaluation.Eval(model, epoch, train_loader)
+                print("Accuracy on test set:")
+                Evaluation.Eval(model, epoch, test_loader)
+            else:
+                cloned_model.load_state_dict(
+                    model.state_dict())  # this is recquired so that new weights are tranfered for testing
+                print("Accuracy on train set:")
+                Evaluation.Eval(cloned_model, epoch, train_loader)
+                print("Accuracy on test set:")
+                Evaluation.Eval(cloned_model, epoch, test_loader)
         # Plotting Loss Curve
         LossCurve.PlotCurve(loss_values, epochs)
