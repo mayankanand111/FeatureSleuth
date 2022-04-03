@@ -27,7 +27,9 @@ class Two_Digit_Image_Train_Loader:
 
         file_reader = gzip.open(labelpath, 'r')
         buf = file_reader.read()
+        # train_label = np.frombuffer(buf, dtype=np.uint8, offset=8)
         train_label = np.frombuffer(buf, dtype=np.uint8, offset=8)
+        # print(train_label)
         digit_one_indices = np.where(train_label == digit_one)
         digit_two_indices = np.where(train_label == digit_two)
         train_data_images_new = np.concatenate((np.take(train_data_images, digit_one_indices, 0)[0],
@@ -35,6 +37,8 @@ class Two_Digit_Image_Train_Loader:
         # print(train_data_images_new.shape)
         train_labels_new = np.concatenate((np.take(train_label, digit_one_indices, 0)[0],
                                            np.take(train_label, digit_two_indices, 0)[0]))
+        train_labels_new[train_labels_new == digit_one] = 0
+        train_labels_new[train_labels_new == digit_two] = 1
 
 
         train_data = MNISTDataset(train_data_images_new, train_labels_new, transform)
@@ -62,6 +66,10 @@ class Two_Digit_Image_Train_Loader:
         # print(test_data_images_new.shape)
         test_labels_new = np.concatenate((np.take(test_label, digit_one_indices, 0)[0],
                                           np.take(test_label, digit_two_indices, 0)[0]))
+
+        test_labels_new[test_labels_new == digit_one] = 0
+        test_labels_new[test_labels_new == digit_two] = 1
+
         # print(test_labels_new)
 
         test_data = MNISTDataset(test_data_images_new, test_labels_new, transform)

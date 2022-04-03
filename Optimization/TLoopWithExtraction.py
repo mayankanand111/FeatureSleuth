@@ -7,17 +7,18 @@ from torchvision.models.feature_extraction import get_graph_node_names
 from torchvision.models.feature_extraction import create_feature_extractor
 import torch.nn.functional as F
 
+
 class TLoopWithExtraction():
     def __init__(self):
         self
 
-    def Tloop_Extraction(model,epochs,optimizer,learning_rate,train_loader,test_loader,cloned_model=None):
-        #loss criteria
+    def Tloop_Extraction(model, epochs, optimizer, learning_rate, train_loader, test_loader, cloned_model=None):
+        # loss criteria
         loss_criterion = nn.NLLLoss()
 
-        #selectinf type of optimizer
+        # selectinf type of optimizer
         if optimizer == 'ADAM':
-            optimizer = torch.optim.Adam(model.parameters(),learning_rate)
+            optimizer = torch.optim.Adam(model.parameters(), learning_rate)
         elif optimizer == 'SGD':
             optimizer = torch.optim.SGD(model.parameters(), learning_rate)
 
@@ -33,11 +34,11 @@ class TLoopWithExtraction():
             batch_counter = 0
             for images, labels in train_loader:
                 model.train()
-                batch_counter +=1
+                batch_counter += 1
                 # if feature cache is not empty than do cosine similarity check
-                if(feature_cachearr!=None):
-                    print("Current Batch is {} and fmap count is {}".format(batch_counter,len(feature_cachearr)))
-                    #first get feature maps for new batch from model trained weights till now
+                if (feature_cachearr != None):
+                    print("Current Batch is {} and fmap count is {}".format(batch_counter, len(feature_cachearr)))
+                    # first get feature maps for new batch from model trained weights till now
                     with torch.no_grad():
                         feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
                         newBatchFeatureMaps = feature_extractor(images)
@@ -55,7 +56,6 @@ class TLoopWithExtraction():
                         #     else:
                         #         cache_hits += 1
 
-
                         ################### Akhilesh
 
                         Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
@@ -69,13 +69,12 @@ class TLoopWithExtraction():
                         cosine_similarity = cosine_similarity.T
                         matched_index = torch.argmax(cosine_similarity, dim=1)
 
-
-                        index_hitlist = label_cachearr[matched_index] [
-                            torch.eq(label_cachearr[matched_index] , labels)]
+                        index_hitlist = label_cachearr[matched_index][
+                            torch.eq(label_cachearr[matched_index], labels)]
 
                         ##################
 
-                        #removing image from batch which got sucessfull hit in cache
+                        # removing image from batch which got sucessfull hit in cache
                         total_indexs = torch.tensor(range(len(images)))
                         indexes_toremove = torch.tensor(index_hitlist)
                         out, c = torch.cat([total_indexs, indexes_toremove]).unique(return_counts=True)
@@ -92,7 +91,7 @@ class TLoopWithExtraction():
                 loss.backward()
                 optimizer.step()
                 with torch.no_grad():
-                    #extract feature maps fo the batch and stack it to cache stack
+                    # extract feature maps fo the batch and stack it to cache stack
                     feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
                     out = feature_extractor(images)
                     feature_cache.append(torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1))
@@ -107,14 +106,13 @@ class TLoopWithExtraction():
             # print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
             loss_values.append(running_loss / len(train_loader))
 
-            #evaluation of model on test data
+            # evaluation of model on test data
             if (cloned_model == None):
-                Evaluation.Eval(model,epoch,test_loader)
+                Evaluation.Eval(model, epoch, test_loader)
             else:
-                cloned_model.load_state_dict(model.state_dict()) # this is recquired so that new weights are tranfered for testing
+                cloned_model.load_state_dict(
+                    model.state_dict())  # this is recquired so that new weights are tranfered for testing
                 Evaluation.Eval(cloned_model, epoch, test_loader)
 
         # Plotting Loss Curve
-        LossCurve.PlotCurve(loss_values,epochs)
-
-
+        LossCurve.PlotCurve(loss_values, epochs)
