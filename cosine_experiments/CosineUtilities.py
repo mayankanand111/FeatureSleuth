@@ -9,10 +9,11 @@ import matplotlib.pyplot as plt
 from Conf import DataConfig
 from Conf.DataConfig import MNISTConfig
 import hydra
-from hydra.core.config_store  import ConfigStore
+from hydra.core.config_store import ConfigStore
+
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
-def main(cfg: MNISTConfig) -> None:
+def train_half_dataset(cfg: MNISTConfig) -> None:
     # we will save the conv layer weights in this list
     model_weights = []
     # we will save the 49 conv layers in this list
@@ -41,15 +42,19 @@ def main(cfg: MNISTConfig) -> None:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = cnn_model.to(device)
 
+    # first train on half of the images
+    train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path, cfg.params.train_labels_path,
+                                                          cfg.hyperparams.batch_size)
+
+
     test_loader = Loader.Test_Loader.load_test_dataset(cfg.params.test_data_path, cfg.params.test_labels_path,
                                                        cfg.hyperparams.batch_size)
 
     EPOCHS = 1
     for epoch in range(EPOCHS):
         for idx, batch in enumerate(test_loader):
-            X,y = batch
+            X, y = batch
             break
-
 
     # image = test_data[0][0].reshape(test_data[0][0].shape[1], -1)
     image = X[0][0]
@@ -96,7 +101,6 @@ def main(cfg: MNISTConfig) -> None:
 
     train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path, cfg.params.train_labels_path,
                                                           cfg.hyperparams.batch_size)
-
 
     for img, label in train_loader:
         # print(len(label))
@@ -165,13 +169,13 @@ def main(cfg: MNISTConfig) -> None:
     K = 30
     res2 = [ele for ele in labels_stores_new2 for i in range(K)]
 
-    print("processed[0] : ",processed[0].shape)
-    plt.imshow(processed[0])
-    plt.show()
+    print("processed[0] : ", processed[0].shape)
+    # plt.imshow(processed[0])
+    # plt.show()
     print("Printed processed image")
 
     print(feature_maps_stores11[0].shape)
-    emp_dict = {"cos_sims" : [], "sim_images" : [],"sim_labels" : []}
+    emp_dict = {"cos_sims": [], "sim_images": [], "sim_labels": []}
 
     for i, j in zip(feature_maps_stores11, res1):
         new_img = processed[0].flatten()
@@ -196,5 +200,9 @@ def main(cfg: MNISTConfig) -> None:
     plt.title(emp_dict['sim_labels'][idx_max_sim])
     plt.imshow(emp_dict['sim_images'][idx_max_sim])
     plt.show()
+
+    print("program end")
+
+
 if __name__ == "__main__":
     main()
