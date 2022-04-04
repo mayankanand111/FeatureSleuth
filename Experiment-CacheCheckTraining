@@ -1,0 +1,409 @@
+========================================================================================================================
+                                        Experiment-Cache Check Training
+========================================================================================================================
+This readme file explains about experiment Cache Check Training.
+========================================================================================================================
+1. What did you try?
+
+Our objective in this experiment was to find similar images in a dataset using feature maps. So what we did is as we are
+training images in batches, after every batch we are extracting feature maps from the first layer of cnn and storing
+these extracted feature maps in cache. So when the next batch comes we first extract feature maps for that batch using the
+weights that we have got on training our model so far. And these feature maps are compared against the ones that are stored
+in cache using using cosine similarity check.
+
+On finding most similar feature map against the cache if the label for both feature maps is same, we removed that image
+from the batch and train our model on images that did not find any match in cache.
+
+This check is done on each batch input.
+========================================================================================================================
+2. Why did you try it?
+
+The reason we tried this experiment is to accelerate the training by not training our model on same set of images which
+might increase training time. And we thought like is training model  on different images might act as a regularizer too.
+========================================================================================================================
+3. What did you expect by trying it?
+
+ We expected that when we train images before checking their similarity we might be able to train only on different type
+ of images which might led us to find optimum quicker as training on similar images will makes our optimizer to follow
+ zig-zag path. which might take time to find the optimum.Especially when the batch size is large.
+========================================================================================================================
+4. Did it happen the way you expected?
+
+Yes, but not the exactly same that we expected. 
+
+Expectation : We expected that in each epoch accuracy of the model trained using cached technique will outperfom the normal
+technique without cashing.
+
+Reality : In results it showed that for first two epochs cached technique outperformed vanilla technique but in later epochs it didnot.
+
+
+Reason: Because as when we are caching data we are restricting dataset to smaller set so its did get little biased towrds those examples. So in future experiments what we will try is for first few epochs we will use cache technique and for later will use vanilla technique so to accelerate learning.
+
+Finding: Larger batche sizes can be used using cached technique to accelerate learning in first few epochs.
+
+========================================================================================================================
+5. What changes did you make to the models and/or to the data and/or to the training procedure and/or to the evaluation?
+    Why?
+We made changes in training loop while sending batches for training. For each batch we extracted featuremaps of batch images and compared it with already cached feature maps and if the feature maps matches using cosine similarity we didnot pas that image for training as already model is trained on similar kind of image.
+
+========================================================================================================================
+                                                    RESULTS
+========================================================================================================================
+Batch Size>    ||    2048    ||     1024     ||     512     ||      256     ||     128      ||      64      || 
+Epochs         ||            ||              ||             ||              ||              ||              ||    
+1   Vanilla    ||21.16699218 ||12.6193576    ||26.19243421  ||96.304086     ||93.26923076   ||97.475961     ||
+    Cached     ||32.20214    ||25.5859       ||80.50986     ||14.853766     ||88.15104      ||69.1105769    ||
+=========================================================================================================================
+2   Vanilla    ||62.26806640 ||38.7912326    ||89.206414    ||97.966746     ||94.6915064    ||97.936698     ||
+    Cached     ||59.362792   ||54.806857     ||87.263569    ||20.923477     ||83.283253     ||75.3605769    ||
+=========================================================================================================================
+3   Vanilla    ||87.036132   ||85.1453993    ||93.050986    ||98.187099     ||95.723157     ||98.347355     ||
+    Cached     ||73.71826    ||64.7135416    ||89.987664    ||44.851762     ||94.230769     ||72.946714     ||
+=========================================================================================================================
+4   Vanilla    ||90.722656   ||84.3532986    ||94.037828    ||98.23717      ||96.133814     ||98.507612     ||
+    Cached     ||78.6376953  ||69.5855034    ||95.1274671   ||63.752003     ||93.780048     ||81.029647     ||
+=========================================================================================================================
+5   Vanilla    ||93.26171    ||91.11328      ||95.2508223   ||98.397435     ||96.4543269    ||98.507612     ||
+    Cached     ||88.854980   ||68.326822     ||93.924753    ||85.586939     ||96.374198     ||66.7668269    ||
+=========================================================================================================================
+6   Vanilla    ||93.94531    ||92.415364     ||95.5489309   ||98.477564     ||96.684695     ||98.367387     ||
+    Cached     ||85.83984375 ||72.775607     ||96.26850     ||91.195913     ||93.880208     ||73.127003     ||
+=========================================================================================================================
+7   Vanilla    ||94.677734   ||91.91623      ||96.0526315   ||98.647836     ||96.854967     ||98.4975961    ||
+    Cached     ||89.6850585  ||76.822916     ||94.9013157   ||91.636618     ||92.718349     ||80.2183493    ||
+=========================================================================================================================
+8   Vanilla    ||94.787597   ||93.402777     ||96.1451480   ||98.768028     ||96.995192     ||98.347355     ||
+    Cached     ||91.967773   ||76.768663     ||97.2347861   ||91.235977     ||86.828926     ||82.562099     ||
+=========================================================================================================================
+9   Vanilla    ||95.520019   ||94.129774     ||96.515213    ||98.808092     ||96.704727     ||98.57772435   ||
+    Cached     ||92.70019    ||81.6731770    ||95.9395559   ||93.078926     ||93.349358     ||79.617387     ||
+=========================================================================================================================
+10  Vanilla    ||95.629882   ||94.140625     ||96.648848    ||98.828125     ||97.185496     ||98.737980     ||
+    Cached     ||93.322753   ||78.90625      ||97.018914    ||95.512820     ||95.262419     ||79.6274038    ||
+=========================================================================================================================
+Final Train:   ||            ||              ||             ||              ||              ||              ||
+Vanilla        ||95.617254   ||94.0261314    ||97.048611    ||99.3823450    ||97.9734241    ||99.7632070    ||
+Cached         ||95.434570   ||78.577922     ||97.566105    ||95.7248263    ||95.536191     ||80.0593649    ||
+=========================================================================================================================
+Final Test:    ||            ||              ||             ||              ||              ||              ||
+Vanilla        ||93.881330   ||94.28168402   ||96.66940     ||98.828125     ||97.185496     ||98.737980     ||
+Cached         ||93.64013    ||78.797743055  ||96.95723     ||95.5328525    ||95.252403     ||79.637419     ||
+=========================================================================================================================
+
+
+============================Batch Size 2048=======================
+Accuracy after  1  epochs :  21.1669921875
+Accuracy after  2  epochs :  62.26806640625
+Accuracy after  3  epochs :  87.0361328125
+Accuracy after  4  epochs :  90.72265625
+Accuracy after  5  epochs :  93.26171875
+Accuracy after  6  epochs :  93.9453125
+Accuracy after  7  epochs :  94.677734375
+Accuracy after  8  epochs :  94.78759765625
+Accuracy after  9  epochs :  95.52001953125
+Accuracy after  10  epochs :  95.6298828125
+Accuracy on train set:
+Accuracy after  10  epochs :  95.61725484913794
+Accuracy on test set:
+Accuracy after  10  epochs :  95.4345703125
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 57344
+Total successful cache hits in 0 epoch are : 52839
+Accuracy after  1  epochs :  32.2021484375
+Total cache hits in 1 epoch are : 57344
+Total successful cache hits in 1 epoch are : 54090
+Accuracy after  2  epochs :  59.36279296875
+Total cache hits in 2 epoch are : 57344
+Total successful cache hits in 2 epoch are : 54146
+Accuracy after  3  epochs :  73.71826171875
+Total cache hits in 3 epoch are : 57344
+Total successful cache hits in 3 epoch are : 54224
+Accuracy after  4  epochs :  78.6376953125
+Total cache hits in 4 epoch are : 57344
+Total successful cache hits in 4 epoch are : 54192
+Accuracy after  5  epochs :  88.85498046875
+Total cache hits in 5 epoch are : 57344
+Total successful cache hits in 5 epoch are : 54235
+Accuracy after  6  epochs :  85.83984375
+Total cache hits in 6 epoch are : 57344
+Total successful cache hits in 6 epoch are : 54177
+Accuracy after  7  epochs :  89.68505859375
+Total cache hits in 7 epoch are : 57344
+Total successful cache hits in 7 epoch are : 54290
+Accuracy after  8  epochs :  91.9677734375
+Total cache hits in 8 epoch are : 57344
+Total successful cache hits in 8 epoch are : 54239
+Accuracy after  9  epochs :  92.7001953125
+Total cache hits in 9 epoch are : 57344
+Total successful cache hits in 9 epoch are : 54333
+Accuracy after  10  epochs :  93.32275390625
+Accuracy on train set:
+Accuracy after  10  epochs :  93.88133081896551
+Accuracy on test set:
+Accuracy after  10  epochs :  93.64013671875
+
+=============================================================================================================================
+
+==============================Batch Size 1024=========================
+Accuracy after  1  epochs :  12.61935763888889
+Accuracy after  2  epochs :  38.79123263888889
+Accuracy after  3  epochs :  85.14539930555556
+Accuracy after  4  epochs :  84.35329861111111
+Accuracy after  5  epochs :  91.11328125
+Accuracy after  6  epochs :  92.41536458333334
+Accuracy after  7  epochs :  91.91623263888889
+Accuracy after  8  epochs :  93.40277777777779
+Accuracy after  9  epochs :  94.12977430555556
+Accuracy after  10  epochs :  94.140625
+Accuracy on train set:
+Accuracy after  10  epochs :  94.02613146551724
+Accuracy on test set:
+Accuracy after  10  epochs :  94.28168402777779
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 58368
+Total successful cache hits in 0 epoch are : 53667
+Accuracy after  1  epochs :  25.5859375
+Total cache hits in 1 epoch are : 58368
+Total successful cache hits in 1 epoch are : 54571
+Accuracy after  2  epochs :  54.806857638888886
+Total cache hits in 2 epoch are : 58368
+Total successful cache hits in 2 epoch are : 54601
+Accuracy after  3  epochs :  64.71354166666666
+Total cache hits in 3 epoch are : 58368
+Total successful cache hits in 3 epoch are : 54539
+Accuracy after  4  epochs :  69.58550347222221
+Total cache hits in 4 epoch are : 58368
+Total successful cache hits in 4 epoch are : 54502
+Accuracy after  5  epochs :  68.32682291666666
+Total cache hits in 5 epoch are : 58368
+Total successful cache hits in 5 epoch are : 54581
+Accuracy after  6  epochs :  72.77560763888889
+Total cache hits in 6 epoch are : 58368
+Total successful cache hits in 6 epoch are : 54518
+Accuracy after  7  epochs :  76.82291666666666
+Total cache hits in 7 epoch are : 58368
+Total successful cache hits in 7 epoch are : 54627
+Accuracy after  8  epochs :  76.76866319444444
+Total cache hits in 8 epoch are : 58368
+Total successful cache hits in 8 epoch are : 54545
+Accuracy after  9  epochs :  81.67317708333334
+Total cache hits in 9 epoch are : 58368
+Total successful cache hits in 9 epoch are : 54598
+Accuracy after  10  epochs :  78.90625
+Accuracy on train set:
+Accuracy after  10  epochs :  78.5779229525862
+Accuracy on test set:
+Accuracy after  10  epochs :  78.79774305555556
+
+=========================================================================================================================
+
+=================Batch size 512======================
+
+Accuracy after  1  epochs :  26.192434210526315
+Accuracy after  2  epochs :  89.20641447368422
+Accuracy after  3  epochs :  93.05098684210526
+Accuracy after  4  epochs :  94.03782894736842
+Accuracy after  5  epochs :  95.25082236842105
+Accuracy after  6  epochs :  95.54893092105263
+Accuracy after  7  epochs :  96.05263157894737
+Accuracy after  8  epochs :  96.14514802631578
+Accuracy after  9  epochs :  96.51521381578947
+Accuracy after  10  epochs :  96.64884868421053
+Accuracy on train set:
+Accuracy after  10  epochs :  97.04861111111111
+Accuracy on test set:
+Accuracy after  10  epochs :  96.66940789473685
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 59392
+Total successful cache hits in 0 epoch are : 54833
+Accuracy after  1  epochs :  80.50986842105263
+Total cache hits in 1 epoch are : 59392
+Total successful cache hits in 1 epoch are : 55234
+Accuracy after  2  epochs :  87.26356907894737
+Total cache hits in 2 epoch are : 59392
+Total successful cache hits in 2 epoch are : 55297
+Accuracy after  3  epochs :  89.98766447368422
+Total cache hits in 3 epoch are : 59392
+Total successful cache hits in 3 epoch are : 55376
+Accuracy after  4  epochs :  95.12746710526315
+Total cache hits in 4 epoch are : 59392
+Total successful cache hits in 4 epoch are : 55337
+Accuracy after  5  epochs :  96.26850328947368
+Total cache hits in 5 epoch are : 59392
+Total successful cache hits in 5 epoch are : 55378
+Accuracy after  6  epochs :  93.92475328947368
+Total cache hits in 6 epoch are : 59392
+Total successful cache hits in 6 epoch are : 55409
+Accuracy after  7  epochs :  94.90131578947368
+Total cache hits in 7 epoch are : 59392
+Total successful cache hits in 7 epoch are : 55360
+Accuracy after  8  epochs :  97.23478618421053
+Total cache hits in 8 epoch are : 59392
+Total successful cache hits in 8 epoch are : 55369
+Accuracy after  9  epochs :  95.93955592105263
+Total cache hits in 9 epoch are : 59392
+Total successful cache hits in 9 epoch are : 55401
+Accuracy after  10  epochs :  97.01891447368422
+Accuracy on train set:
+Accuracy after  10  epochs :  97.56610576923077
+Accuracy on test set:
+Accuracy after  10  epochs :  96.95723684210526
+=========================================================================================================================
+==========================Batch Size 256===================================
+Accuracy after  1  epochs :  96.30408653846155
+Accuracy after  2  epochs :  97.9667467948718
+Accuracy after  3  epochs :  98.18709935897436
+Accuracy after  4  epochs :  98.23717948717949
+Accuracy after  5  epochs :  98.3974358974359
+Accuracy after  6  epochs :  98.4775641025641
+Accuracy after  7  epochs :  98.64783653846155
+Accuracy after  8  epochs :  98.76802884615384
+Accuracy after  9  epochs :  98.80809294871796
+Accuracy after  10  epochs :  98.828125
+Accuracy on train set:
+Accuracy after  10  epochs :  99.38234508547008
+Accuracy on test set:
+Accuracy after  10  epochs :  98.828125
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 59648
+Total successful cache hits in 0 epoch are : 55238
+Accuracy after  1  epochs :  14.853766025641027
+Total cache hits in 1 epoch are : 59648
+Total successful cache hits in 1 epoch are : 55388
+Accuracy after  2  epochs :  20.923477564102562
+Total cache hits in 2 epoch are : 59648
+Total successful cache hits in 2 epoch are : 55398
+Accuracy after  3  epochs :  44.85176282051282
+Total cache hits in 3 epoch are : 59648
+Total successful cache hits in 3 epoch are : 55370
+Accuracy after  4  epochs :  63.752003205128204
+Total cache hits in 4 epoch are : 59648
+Total successful cache hits in 4 epoch are : 55379
+Accuracy after  5  epochs :  85.5869391025641
+Total cache hits in 5 epoch are : 59648
+Total successful cache hits in 5 epoch are : 55375
+Accuracy after  6  epochs :  91.19591346153845
+Total cache hits in 6 epoch are : 59648
+Total successful cache hits in 6 epoch are : 55340
+Accuracy after  7  epochs :  91.63661858974359
+Total cache hits in 7 epoch are : 59648
+Total successful cache hits in 7 epoch are : 55291
+Accuracy after  8  epochs :  91.23597756410257
+Total cache hits in 8 epoch are : 59648
+Total successful cache hits in 8 epoch are : 55431
+Accuracy after  9  epochs :  93.07892628205127
+Total cache hits in 9 epoch are : 59648
+Total successful cache hits in 9 epoch are : 55396
+Accuracy after  10  epochs :  95.51282051282051
+Accuracy on train set:
+Accuracy after  10  epochs :  95.72482638888889
+Accuracy on test set:
+Accuracy after  10  epochs :  95.53285256410257
+
+=========================================================================================================================
+Accuracy after  1  epochs :  93.26923076923077
+Accuracy after  2  epochs :  94.69150641025641
+Accuracy after  3  epochs :  95.72315705128204
+Accuracy after  4  epochs :  96.1338141025641
+Accuracy after  5  epochs :  96.45432692307693
+Accuracy after  6  epochs :  96.68469551282051
+Accuracy after  7  epochs :  96.85496794871796
+Accuracy after  8  epochs :  96.9951923076923
+Accuracy after  9  epochs :  96.70472756410257
+Accuracy after  10  epochs :  97.1854967948718
+Accuracy on train set:
+Accuracy after  10  epochs :  97.97342414529915
+Accuracy on test set:
+Accuracy after  10  epochs :  97.1854967948718
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 59776
+Total successful cache hits in 0 epoch are : 55327
+Accuracy after  1  epochs :  88.15104166666666
+Total cache hits in 1 epoch are : 59776
+Total successful cache hits in 1 epoch are : 55443
+Accuracy after  2  epochs :  83.2832532051282
+Total cache hits in 2 epoch are : 59776
+Total successful cache hits in 2 epoch are : 55468
+Accuracy after  3  epochs :  94.23076923076923
+Total cache hits in 3 epoch are : 59776
+Total successful cache hits in 3 epoch are : 55446
+Accuracy after  4  epochs :  93.78004807692307
+Total cache hits in 4 epoch are : 59776
+Total successful cache hits in 4 epoch are : 55528
+Accuracy after  5  epochs :  96.37419871794873
+Total cache hits in 5 epoch are : 59776
+Total successful cache hits in 5 epoch are : 55396
+Accuracy after  6  epochs :  93.88020833333334
+Total cache hits in 6 epoch are : 59776
+Total successful cache hits in 6 epoch are : 55568
+Accuracy after  7  epochs :  92.71834935897436
+Total cache hits in 7 epoch are : 59776
+Total successful cache hits in 7 epoch are : 55458
+Accuracy after  8  epochs :  86.82892628205127
+Total cache hits in 8 epoch are : 59776
+Total successful cache hits in 8 epoch are : 55507
+Accuracy after  9  epochs :  93.34935897435898
+Total cache hits in 9 epoch are : 59776
+Total successful cache hits in 9 epoch are : 55480
+Accuracy after  10  epochs :  95.26241987179486
+Accuracy on train set:
+Accuracy after  10  epochs :  95.53619123931624
+Accuracy on test set:
+Accuracy after  10  epochs :  95.25240384615384
+
+=========================================================================================================================
+===================================Batch Size 64======================================
+Accuracy after  1  epochs :  97.42588141025641
+Accuracy after  2  epochs :  98.22716346153845
+Accuracy after  3  epochs :  98.57772435897436
+Accuracy after  4  epochs :  98.72796474358975
+Accuracy after  5  epochs :  98.64783653846155
+Accuracy after  6  epochs :  98.85817307692307
+Accuracy after  7  epochs :  98.77804487179486
+Accuracy after  8  epochs :  98.65785256410257
+Accuracy after  9  epochs :  98.56770833333334
+Accuracy after  10  epochs :  98.85817307692307
+Accuracy on train set:
+Accuracy after  10  epochs :  99.54475720384205
+Accuracy on test set:
+Accuracy after  10  epochs :  98.85817307692307
+Total cache hits in 0 epoch are : 59904
+Total successful cache hits in 0 epoch are : 55378
+Accuracy after  1  epochs :  69.11057692307693
+Total cache hits in 1 epoch are : 59904
+Total successful cache hits in 1 epoch are : 55523
+Accuracy after  2  epochs :  75.36057692307693
+Total cache hits in 2 epoch are : 59904
+Total successful cache hits in 2 epoch are : 55480
+Accuracy after  3  epochs :  72.94671474358975
+Total cache hits in 3 epoch are : 59904
+Total successful cache hits in 3 epoch are : 55415
+Accuracy after  4  epochs :  81.02964743589743
+Total cache hits in 4 epoch are : 59904
+Total successful cache hits in 4 epoch are : 55351
+Accuracy after  5  epochs :  66.76682692307693
+Total cache hits in 5 epoch are : 59904
+Total successful cache hits in 5 epoch are : 55388
+Accuracy after  6  epochs :  73.1270032051282
+Total cache hits in 6 epoch are : 59904
+Total successful cache hits in 6 epoch are : 55531
+Accuracy after  7  epochs :  80.21834935897436
+Total cache hits in 7 epoch are : 59904
+Total successful cache hits in 7 epoch are : 55350
+Accuracy after  8  epochs :  82.56209935897436
+Total cache hits in 8 epoch are : 59904
+Total successful cache hits in 8 epoch are : 55384
+Accuracy after  9  epochs :  79.61738782051282
+Total cache hits in 9 epoch are : 59904
+Total successful cache hits in 9 epoch are : 55422
+Accuracy after  10  epochs :  79.62740384615384
+Accuracy on train set:
+Accuracy after  10  epochs :  80.05936499466382
+Accuracy on test set:
+Accuracy after  10  epochs :  79.63741987179486
+=========================================================================================================================
