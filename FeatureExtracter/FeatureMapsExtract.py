@@ -2,6 +2,7 @@ import numpy
 import torch
 import torch.nn as nn
 import numpy as np
+from torchvision.models.feature_extraction import create_feature_extractor
 
 
 class FmapExtract:
@@ -59,9 +60,20 @@ class FmapExtract:
         #     feature_list.append(torch.tensor(i.reshape(1, 24, 24)))
         # print("Inside get features from loader")
         # print(len(train_feature_maps), len(train_labels))
-        return np.array(train_feature_maps), np.array(train_labels, dtype=np.uint8)
+        # return np.array(train_feature_maps), np.array(train_labels, dtype=np.uint8)
+        return [t.numpy() for t in train_feature_maps], np.array(train_labels, dtype=np.uint8)
 
-    def extract_featuremaps_new(batch_images,model):
+    
+    def get_feature_maps(model, batch_images):
+        feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
+        newBatchFeatureMaps = feature_extractor(batch_images)
+        print(newBatchFeatureMaps.shape)
+
+        Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
+        # print(type(Z.shape))
+        return Z
+    
+    def extract_featuremaps_new(batch_images, model):
         model_weights = []
         conv_layers = []
         model_children = list(model.children())
@@ -85,4 +97,3 @@ class FmapExtract:
             outputs.append(image)
 
         return outputs[0]
-

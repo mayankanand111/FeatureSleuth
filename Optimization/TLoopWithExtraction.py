@@ -104,7 +104,7 @@ class TLoopWithExtraction():
                 loss.backward()
                 optimizer.step()
                 with torch.no_grad():
-                    # extract feature maps fo the batch and stack it to cache stack
+                    # extract feature maps of the batch and stack it to cache stack
                     feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
                     out = feature_extractor(images)
                     feature_cache.append(torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1))

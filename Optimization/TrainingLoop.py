@@ -8,7 +8,8 @@ class TrainLoop():
     def __init__(self):
         self
 
-    def Tloop(model, epochs, optimizer, learning_rate, train_loader, test_loader, cloned_model=None):
+    def Tloop(model, epochs, optimizer, learning_rate, train_loader, test_loader, cloned_model=None,
+              get_final_accuracy=True):
         # loss criteria
         loss_criterion = nn.NLLLoss()
 

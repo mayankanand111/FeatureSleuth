@@ -1,0 +1,116 @@
+========================================================================================================================
+                                        Experiment - FeatureMap Training
+========================================================================================================================
+This readme file explains about an experiment done by training a model on feature map.
+========================================================================================================================
+
+what did you try?
+The experiment we tried is that, we trained a model(say m1) with simple architecture on an MNIST dataset and transfered
+the weights of that model to a new model(say m2) with similar architecture and trained the new model, m2, on the feature
+ maps extracted from the first layer(These feature maps are extracted using m1).
+Note: The architecture of m2 is similar to m1 but not same because m2 will get the feature maps that has smaller size
+than the original images size, so we have added padding to compansate that.
+
+
+====================================================================
+
+why did you try it?
+When we train a model on a large number of images that has only the edges or curves (as feature maps extracted from
+first layer contains only these) then it helps the model 'not' to overfit. In other terms this will act as a
+regularization technique. So with this experiment would like tto see whether training the model on first layer of
+feature maps helps in regularization i.e, will it give good results on the testing set after training the model
+on the feature maps.
+
+====================================================================
+
+what did you expect by trying it?
+From this experiment we expect an increment in the accuracy of the testing set. We are expecting that our model, with
+same architecture, when trained on feature maps(taken from output of first layer) will outperform on the testing set
+comparatively. That is we expect that testing accuracy will be more than that of the training accuracies.
+
+====================================================================
+
+did it happen the way you expected?
+When we trained the model on the feature maps, we saw from first model, m1, that is trained on MNIST
+dataset(with batch size of 512 and 10 epochs) of 60k images gave the accuracy of 99 on the training set but on the
+testing set it was only 98. When we trained the new model, m2, by transfering the weights from m1 and training on
+feature maps, we saw that the training and testing set accuracies were almost same however this time we saw a very
+small improvement in the testing dataset compartively however the overall accuracy is decreased. This is because when
+the model got trained on around 60000*15= 900,000 images and 60k images(which were trained with m1). 900,000 images
+are only edges and curves and hence a decrease in accuracy is explainable.
+
+====================================================================
+
+what changes did you make to the models and/or to the data and/or to the training
+procedure and/or to the evaluation? why?
+We only used a simple architecture with 2 convolution layers and max pool layers after each of these convolution
+layers and an an activation layer after Max pool layer. We then included two linear layers with an activation layer
+in between them and finally a softmax.
+	conv->maxpool->relu->conv->maxpool->relu->linear->relu->linear->softmax
+In terms of architecture we have choosen this because, we don't want to include any sort of regularization in our
+architecture and we would like to see if our approach of training the model on the feature maps helps itself in
+regularization.
+For evaluation, we have transfered the weights that we got from the new model, m2, and tested the model against the
+MNIST test dataset.
+We have choosen this technique of evaluation because when new model, m2, gets trained only on the feature maps that has
+ less size (24,24) and hence we need to transfer the weights to the model, m1, to verify them on the original
+ test dataset which has a size of (28,28). This image size matters because we write the no of units in linear layer
+ according to the size of the image.
+
+====================================================================
+
+what experiments did you try in which you kept certain things fixed while varying others?
+We experimented with different batch size - 64, 256, 512 etc. We wanted to see if the batch size makes any difference
+when we are training with 900,000 images but we saw not a much difference.
+
+====================================================================
+
+summarize those results informally, and if possible present some graphs and/or tables
+
+Results from training a model(m1) on 60k MNIST dataset:
+*********************************
+Accuracy after  1  epochs :  95.8233173076923
+Accuracy after  2  epochs :  97.11538461538461
+Accuracy after  3  epochs :  97.7363782051282
+Accuracy after  4  epochs :  97.7764423076923
+Accuracy after  5  epochs :  97.79647435897436
+Accuracy after  6  epochs :  98.46754807692307
+Accuracy after  7  epochs :  97.9266826923077
+Accuracy after  8  epochs :  98.07692307692307
+Accuracy after  9  epochs :  98.07692307692307
+Accuracy after  10  epochs :  98.14703525641025
+Accuracy on train set:
+Accuracy after  10  epochs :  98.98612593383137
+Accuracy on test set:
+Accuracy after  10  epochs :  98.13701923076923
+
+
+Results from training a model(m2) on 900,000 MNIST dataset:
+*********************************
+Accuracy after  1  epochs :  94.09950657894737
+Accuracy after  2  epochs :  93.77055921052632
+Accuracy after  3  epochs :  94.88075657894737
+Accuracy after  4  epochs :  94.47985197368422
+Accuracy after  5  epochs :  93.2360197368421
+Accuracy after  6  epochs :  93.51356907894737
+Accuracy after  7  epochs :  93.47245065789474
+Accuracy after  8  epochs :  95.20970394736842
+Accuracy after  9  epochs :  95.21998355263158
+Accuracy after  10  epochs :  94.36677631578947
+==================================
+Final Accuracy Calculated on train set:
+Accuracy on train set:  98.16038995726495
+Final Accuracy Calculated on test set:
+Accuracy after  10  epochs :  97.93379934210526
+==================================
+Final Accuracy Calculated on train set with featuremap trained:
+Accuracy on train set:  94.24412393162393
+Final Accuracy Calculated on test set with featuremap trained:
+Accuracy on test set:  94.34621710526315
+
+
+Future experiments:
+We would like to experiment we would like to consider images of two numbers from the MNIST data
+set and take all the feature maps obtained after each convolution layer. We will then pass these feature
+maps as input images to a new model with the same architecture, and this new model is tested against
+the original images taken from the MNIST data set for two numbers
