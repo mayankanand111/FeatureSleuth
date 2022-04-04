@@ -1,0 +1,124 @@
+What did we try?
+To validate our findings, we also performed our experiments on Fashion Mnist Dataset which is a little more
+complex dataset compared to the standard Mnist dataset.
+
+Why did we try this?
+After performing exploratory data analysis and working with the Mnist dataset, it can be deduced that
+the Mnist dataset is rather simple dataset to work with. Moreover, after performing the t-sne plot it
+can also be observed that the dataset is linearly separable. Now, looking from the modelling perspective,
+CNNs extract features starting from low level to high level. That is, the initial layers of CNN try to extract
+feature the low level features from the images which are things like edges, curves, corners. As, we move deeper
+into the network the layers learn high level features which are the combinations of the edges, curves and so
+on giving us shapes and other complex features. If we look at the Mnist dataset, they are all nothing but
+numbers. So, essentially when we build Cnn on Mnist dataset, the initial layers would learn all the edges
+and curves of the images which are used to classify the images. Meaning, the initial layers are sufficient
+to learn all the features of the images as the edges and curves is what the numbers are made up of. Thus,
+to increase the complexity of the images and the feature maps we are choosing to perform our experiments on
+Fashion Mnist dataset.
+
+Did it happen the way you expected?
+One of the primary things which was observed from the experiment is that, the feature maps which were
+extracted for finding the cosine similarity from the second convolution layer of the CNN performed better
+in terms accuracy compared to the first convolution layer. This was exactly what we expected to happen.
+
+What changes did we make?
+While training the model, after each epoch the feature maps of first or second layer (depending on our use case)
+are getting generated from the model. For the first batch these feature maps are stored in the cache.
+Now for the subsequent batches the feature maps are again extracted from the model and these feature maps
+are compared to the ones present in the cache using cosine similarity and if it matches the label, of the
+images is assigned as it is, and images won’t be passed down to the further layers of the CNN. If match is
+not found, the images from the batch are passed to the model for further training. And the same is repeated
+for every batch and every epoch. By doing this, we are able to classify the images at every iteration using
+the feature maps if they match and send only those ones for training which are not matching. This would
+accelerate the learning in CNN.
+
+What experiments were done?
+In order to test our experiment, the same CNN model consisting of 2 layers was used in training the
+Fashion Mnist data. The base model which was trained on a batch size of 64 and on 10 epochs, provided
+the following scores :
+
+Epoch 1, accuracy : 63.981998443603516
+Epoch 2, accuracy : 74.83599853515625
+Epoch 3, accuracy : 78.1259994506836
+Epoch 4, accuracy : 80.55599975585938
+Epoch 5, accuracy : 82.06199645996094
+Epoch 6, accuracy : 82.9800033569336
+Epoch 7, accuracy : 83.81400299072266
+Epoch 8, accuracy : 84.59200286865234
+Epoch 9, accuracy : 85.24199676513672
+Epoch 10,accuracy : 85.41600036621094
+
+The model trained using feature maps provided the following results :
+
+Total cache hits in 0 epoch are : 49936
+Total successful cache hits in 0 epoch are : 36712
+Accuracy after  1  epochs :  57.34
+Total cache hits in 1 epoch are : 49936
+Total successful cache hits in 1 epoch are : 38910
+Accuracy after  2  epochs :  56.19
+Total cache hits in 2 epoch are : 49936
+Total successful cache hits in 2 epoch are : 39335
+Accuracy after  3  epochs :  61.17
+Total cache hits in 3 epoch are : 49936
+Total successful cache hits in 3 epoch are : 39165
+Accuracy after  4  epochs :  68.16
+Total cache hits in 4 epoch are : 49936
+Total successful cache hits in 4 epoch are : 39183
+Accuracy after  5  epochs :  71.2
+Total cache hits in 5 epoch are : 49936
+Total successful cache hits in 5 epoch are : 39130
+Accuracy after  6  epochs :  80.35
+Total cache hits in 6 epoch are : 49936
+Total successful cache hits in 6 epoch are : 39139
+Accuracy after  7  epochs :  81.97
+Total cache hits in 7 epoch are : 49936
+Total successful cache hits in 7 epoch are : 39138
+Accuracy after  8  epochs :  82.01
+Total cache hits in 8 epoch are : 49936
+Total successful cache hits in 8 epoch are : 39129
+Accuracy after  9  epochs :  84.43
+Total cache hits in 9 epoch are : 49936
+Total successful cache hits in 9 epoch are : 39176
+Accuracy after  10  epochs :  83.61
+
+The model trained on 50% of data normally and the remaining 50% using the feature maps provided the
+following results :
+
+Total cache hits in 0 epoch are : 24976
+Total successful cache hits in 0 epoch are : 17285
+Accuracy after  1  epochs :  74.13
+Total cache hits in 1 epoch are : 24976
+Total successful cache hits in 1 epoch are : 17418
+Accuracy after  2  epochs :  77.60000000000001
+Total cache hits in 2 epoch are : 24976
+Total successful cache hits in 2 epoch are : 18352
+Accuracy after  3  epochs :  79.75999999999999
+Total cache hits in 3 epoch are : 24976
+Total successful cache hits in 3 epoch are : 18242
+Accuracy after  4  epochs :  80.94
+Total cache hits in 4 epoch are : 24976
+Total successful cache hits in 4 epoch are : 18606
+Accuracy after  5  epochs :  82.07
+Total cache hits in 5 epoch are : 24976
+Total successful cache hits in 5 epoch are : 18478
+Accuracy after  6  epochs :  84.17
+Total cache hits in 6 epoch are : 24976
+Total successful cache hits in 6 epoch are : 18823
+Accuracy after  7  epochs :  82.59
+Total cache hits in 7 epoch are : 24976
+Total successful cache hits in 7 epoch are : 18299
+Accuracy after  8  epochs :  85.69
+Total cache hits in 8 epoch are : 24976
+Total successful cache hits in 8 epoch are : 18893
+Accuracy after  9  epochs :  85.64
+Total cache hits in 9 epoch are : 24976
+Total successful cache hits in 9 epoch are : 18884
+Accuracy after  10  epochs :  85.11
+
+From the above results we can conclude that on the partially trained model and using feature maps for training
+on top of that, the model is able to achieve good accuracy a lot quicker, indicating that there is accelerated
+learning happening within the initial epochs itself.
+
+Future work :
+We will performing and testing different experiments where we will be changing the batch size, no of epochs,
+using different model architecture, different activation functions and loss function.
