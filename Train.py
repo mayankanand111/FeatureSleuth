@@ -1,9 +1,10 @@
+from lib2to3.pytree import Base
 import Models.model
 import torch
 from DataLoader import Loader
 import hydra
 from hydra.core.config_store  import ConfigStore
-from Models.model import BaseModel,ThreeLayerModel
+from Models.model import BaseModel, BaseModelWithSigmoid,ThreeLayerModel
 from Optimization.TLoopWithExtraction import TLoopWithExtraction
 from Optimization.TrainingLoop import TrainLoop
 from Conf import DataConfig
@@ -24,13 +25,16 @@ def main(cfg: MNISTConfig) -> None:
     model = BaseModel()
 
     #calling Training Loop
+    TrainLoop.Tloop(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
+
+    model = BaseModel()
+
     TLoopWithExtraction.Tloop_Extraction(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
-    # TrainLoop.Tloop(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
 
     # Saving model trained weights
-    path = cfg.params.pretrain_model_path
-    torch.save(model.state_dict(), path+model.__class__.__name__)
-    print('Trained model : {} saved at {path}'.format(model.__class__.__name__,path=path))
+    # path = cfg.params.pretrain_model_path
+    # torch.save(model.state_dict(), path+model.__class__.__name__)
+    # print('Trained model : {} saved at {path}'.format(model.__class__.__name__,path=path))
 
 if __name__ == "__main__":
     main()
