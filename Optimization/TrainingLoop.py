@@ -46,8 +46,8 @@ class TrainLoop():
                 cloned_model.load_state_dict(
                     model.state_dict())  # this is recquired so that new weights are tranfered for testing
                 Evaluation.Eval(cloned_model, epoch, test_loader)
-        if(epoch+1 == epochs):
-            if (cloned_model == None):
+        if epoch + 1 == epochs and get_final_accuracy:
+            if cloned_model is None:
                 print("Accuracy on train set:")
                 Evaluation.Eval(model, epoch, train_loader)
                 print("Accuracy on test set:")
