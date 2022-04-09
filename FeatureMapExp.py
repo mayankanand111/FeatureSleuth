@@ -1,82 +1,92 @@
+import numpy
 import torch
-from DataLoader import Loader, TwoDigitImageLoader
-import hydra
-from hydra.core.config_store import ConfigStore
-from torch.utils.data import DataLoader
-
-from FeatureExtracter.FeatureMapsExtract import FmapExtract
-from FeatureExtracter.FeatureMapsExtractCosine import FeatureMapExtractor
-from Models.model import BaseModel, ThreeLayerModel, BaseModelWithTwoDigits, BaseModelWithTwoDigits1
-from Optimization.CosineTrain import CosineTrain
-from Optimization.TrainingLoop import TrainLoop
-from Conf import DataConfig
-from Conf.DataConfig import MNISTConfig
-from Research.DataAnalysis import LoadData
-
-cs = ConfigStore.instance()
-cs.store(name="mnsit_config", node=MNISTConfig)
+import torch.nn as nn
+import numpy as np
+from torchvision.models.feature_extraction import create_feature_extractor
 
 
-def append_to_dataset(f_map, feature_map_dataset_dict, labels):
-    if len(feature_map_dataset_dict.keys()) == 0:
-        for key in f_map.keys():
-            tensor_ds_new = Loader.TensorDataset(f_map.get(key), labels=labels)
-            feature_map_dataset_dict[key] = tensor_ds_new
-    else:
-        for key in f_map.keys():
-            tensor_ds = feature_map_dataset_dict.get(key)
-            tensor_ds.append(f_map.get(key), labels)
-            # torch.cat(feature_map_dataset_dict.get(key), f_map.get(key))
-            feature_map_dataset_dict[key] = tensor_ds
+class FmapExtract:
 
-    return feature_map_dataset_dict
+    def extract_featuremaps(batch_images, model, feature_extraction_layers):
+        model_weights = []
+        conv_layers = []
+        model_children = list(model.children())
+        counter = 0
+        for i in range(len(model_children)):
+            if type(model_children[i]) == nn.Conv2d:
+                counter += 1
+                model_weights.append(model_children[i].weight)
+                conv_layers.append(model_children[i])
+            elif type(model_children[i]) == nn.Sequential:
+                for j in range(len(model_children[i])):
+                    for child in model_children[i][j].children():
+                        if type(child) == nn.Conv2d:
+                            counter += 1
+                            model_weights.append(child.weight)
+                            conv_layers.append(child)
 
+        feature_extractor = create_feature_extractor(model, return_nodes=feature_extraction_layers)
+        feature_map_images = feature_extractor(batch_images)
 
-@hydra.main(config_path="Conf", config_name="DataConfig")
-def experiment(cfg: MNISTConfig) -> None:
-    # take the images that are 7 or 8
-    loader_instance = TwoDigitImageLoader.Two_Digit_Image_Train_Loader()
-    train_loader = loader_instance.load_train_dataset(cfg.params.train_data_path, cfg.params.train_labels_path,
-                                                      cfg.hyperparams.batch_size, 4, 7, 8, True)
-    test_loader = loader_instance.load_test_dataset(cfg.params.test_data_path, cfg.params.test_labels_path,
-                                                    cfg.hyperparams.batch_size, 4, 7, 8, True)
+        return feature_map_images
 
-    # train the model
-    model1 = BaseModelWithTwoDigits1()
+    def getfeatures_from_loader(input_loader, model, feature_extraction_layers, sum_up_feature_channels=True):
+        feature_maps = None
+        train_labels = None
+        for images, labels in input_loader:
+            feature_map_dict = FmapExtract.extract_featuremaps(images, model, feature_extraction_layers)
+            for layer in feature_map_dict.keys():
+                if sum_up_feature_channels:
+                    if feature_maps is None:
+                        feature_maps = torch.sum(feature_map_dict[layer], dim=1, keepdim=True)
+                        train_labels = labels
+                    else:
+                        feature_maps = torch.vstack(
+                            (feature_maps, torch.sum(feature_map_dict[layer], dim=1, keepdim=True)))
+                        train_labels = torch.cat((train_labels, labels), 0)
+                else:
+                    temp = feature_map_dict[layer]
+                    current_f = torch.reshape(temp, (len(temp) * temp.shape[1], 1, temp.shape[2], temp.shape[3]))
+                    if feature_maps is None:
+                        feature_maps = current_f
+                    else:
+                        feature_maps = torch.vstack((feature_maps, current_f))
+                    if train_labels is None:
+                        train_labels = labels.repeat_interleave(temp.shape[1])
+                    else:
+                        train_labels = torch.cat((train_labels, labels.repeat_interleave(temp.shape[1])))
+        return [t.detach().numpy() for t in feature_maps], np.array(train_labels, dtype=np.uint8)
 
-    TrainLoop.Tloop(model1, cfg.hyperparams.epochs, cfg.hyperparams.optimizer, cfg.hyperparams.learning_rate,
-                    train_loader, test_loader)
+    def get_feature_maps(model, batch_images):
+        feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
+        newBatchFeatureMaps = feature_extractor(batch_images)
+        print(newBatchFeatureMaps.shape)
 
-    # path = cfg.params.pretrain_model_path
-    # torch.save(model1.state_dict(), path + model1.__class__.__name__)
-    # print('Trained model : {} saved at {path}'.format(model1.__class__.__name__, path=path))
+        Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
+        # print(type(Z.shape))
+        return Z
 
-    # get the accuracy here
-    # extract feature maps of images using the trained model
-    train_loader_f = loader_instance.load_train_dataset(cfg.params.train_data_path, cfg.params.train_labels_path, 1, 7,
-                                                        8, True)
-    # test_loader = loader_instance.load_test_dataset(cfg.params.test_data_path, cfg.params.test_labels_path, 1, 7, 8,
-    #                                                 True)
-    train_images_f, train_labels_f = FmapExtract.getfeatures_from_loader(train_loader_f, model1)
+    def extract_featuremaps_new(batch_images, model):
+        model_weights = []
+        conv_layers = []
+        model_children = list(model.children())
+        counter = 0
+        for i in range(len(model_children)):
+            if type(model_children[i]) == nn.Conv2d:
+                counter += 1
+                model_weights.append(model_children[i].weight)
+                conv_layers.append(model_children[i])
+            elif type(model_children[i]) == nn.Sequential:
+                for j in range(len(model_children[i])):
+                    for child in model_children[i][j].children():
+                        if type(child) == nn.Conv2d:
+                            counter += 1
+                            model_weights.append(child.weight)
+                            conv_layers.append(child)
 
-    feature_loader = Loader.Feature_loader.create_feature_loader(train_images_f, train_labels_f,
-                                                                 cfg.hyperparams.batch_size)
+        outputs = []
+        for layer in conv_layers[0:1]:
+            image = layer(batch_images)
+            outputs.append(image)
 
-    # print("Feature image shape", train_images_f.shape)
-    # feature_map_dataset_dict = {}
-    # f_extractor = FeatureMapExtractor()
-    # for images, labels in train_loader:
-    #     f_map = f_extractor.extract(images, model1)
-    #     feature_map_dataset_dict = append_to_dataset(f_map, feature_map_dataset_dict, labels)
-
-    print("\n Going to train images on feature maps")
-    model2 = BaseModelWithTwoDigits1(padding_digits=2)
-    # for key in feature_map_dataset_dict.keys():
-    #     f_train_loader = feature_map_dataset_dict.get(key)
-    #     f_train_loader = DataLoader(f_train_loader, cfg.hyperparams.batch_size, True)
-    TrainLoop.Tloop(model2, cfg.hyperparams.epochs, cfg.hyperparams.optimizer, cfg.hyperparams.learning_rate,
-                    feature_loader, test_loader, cloned_model=model1)
-
-
-if __name__ == "__main__":
-    experiment()
+        return outputs[0]
