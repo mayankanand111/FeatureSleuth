@@ -21,6 +21,7 @@ class Evaluation():
                     loader_type = "train set"
                 else:
                     loader_type = "test set"
-                print('Accuracy on {loader_type}: '.format(loader_type=loader_type), accuracy)
-            else:
-                print('Accuracy after ', epoch + 1, ' epochs : ', accuracy)
+                #print('Accuracy on {loader_type}: '.format(loader_type=loader_type), accuracy)
+            #else:
+                #print('Accuracy after ', epoch + 1, ' epochs : ', accuracy)
+            return accuracy

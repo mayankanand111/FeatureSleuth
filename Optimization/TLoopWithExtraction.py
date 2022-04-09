@@ -6,6 +6,7 @@ from Visualization.LossCurve import LossCurve
 from torchvision.models.feature_extraction import get_graph_node_names
 from torchvision.models.feature_extraction import create_feature_extractor
 import torch.nn.functional as F
+from tqdm import tqdm
 
 
 class TLoopWithExtraction():
@@ -32,68 +33,48 @@ class TLoopWithExtraction():
             cache_hits = 0
             successfull_cache_hits = 0
             batch_counter = 0
-            for images, labels in train_loader:
+            loop = tqdm(enumerate(train_loader), total=len(train_loader), leave=True)
+            for batch_idx, (images, labels) in loop:
                 model.train()
                 batch_counter += 1
                 # if feature cache is not empty than do cosine similarity check
-                if(feature_cachearr!=None):
-                    #print("Current Batch is {} and fmap count is {}".format(batch_counter,len(feature_cachearr)))
-                    #first get feature maps for new batch from model trained weights till now
-                    with torch.no_grad():
-                        feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
-                        newBatchFeatureMaps = feature_extractor(images)
+                if (feature_cachearr != None):
+                    # print("Current Batch is {} and fmap count is {}".format(batch_counter,len(feature_cachearr)))
+                    # first get feature maps for new batch from model trained weights till now
+                    if (batch_counter % 2 == 0):
+                        with torch.no_grad():
+                            feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
+                            newBatchFeatureMaps = feature_extractor(images)
 
-                        # now we have feature maps of new batch and feature maps cache so far to perform cosine similarity check
+                            # now we have feature maps of new batch and feature maps cache so far to perform cosine similarity check
+                            Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
 
+                            Z_norm = torch.linalg.norm(Z, dim=1, keepdim=True)  # Size (n, 1).
+                            B_norm = torch.linalg.norm(feature_cachearr, dim=1, keepdim=True)  # Size (1, b).
 
-                        #TODO : below code have to be removed as numpy array match is implemented
-                        # index_hitlist = []
-                        # test=[]
-                        # for index in range(len(images)):
-                        #     matched_index = torch.argmax(F.cosine_similarity(
-                        #     torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3),dim=1)[index],
-                        #     feature_cachearr, dim=1))
-                        #     test.append(matched_index)
-                        #     if(label_cachearr[matched_index].item()==labels[index].item()):
-                        #         #remove that image from batch
-                        #         successfull_cache_hits += 1
-                        #         cache_hits += 1
-                        #         index_hitlist.append(index)
-                        #     else:
-                        #         cache_hits += 1
+                            # Distance matrix of size (b, n).
+                            cosine_similarity = ((Z @ feature_cachearr.T) / (Z_norm @ B_norm.T)).T
 
+                            cosine_similarity = cosine_similarity.T
+                            matched_index = torch.argmax(cosine_similarity, dim=1)
 
+                            # removing image from batch which got sucessfull hit in cache
+                            total_indexs = torch.tensor(range(len(images)))
+                            index_hitlist = total_indexs[torch.eq(label_cachearr[matched_index], labels)]
 
-                        Z = torch.sum(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), dim=1)
+                            # adding cahce hits and sucessful cache hits
+                            cache_hits += label_cachearr[matched_index].shape[0]
+                            successfull_cache_hits += index_hitlist.shape[0]
 
-                        Z_norm = torch.linalg.norm(Z, dim=1, keepdim=True)  # Size (n, 1).
-                        B_norm = torch.linalg.norm(feature_cachearr, dim=1, keepdim=True)  # Size (1, b).
+                            indexes_toremove = index_hitlist
+                            out, c = torch.cat([total_indexs, indexes_toremove]).unique(return_counts=True)
+                            indexes_tokeep = out[c == 1]
+                            images = torch.index_select(images, 0, indexes_tokeep)
+                            labels = torch.index_select(labels, 0, indexes_tokeep)
 
-                        # Distance matrix of size (b, n).
-                        cosine_similarity = ((Z @ feature_cachearr.T) / (Z_norm @ B_norm.T)).T
-
-                        cosine_similarity = cosine_similarity.T
-                        matched_index = torch.argmax(cosine_similarity, dim=1)
-
-                        #TODO: below code has to be reoved as right index fix is implemented
-                        # below code gets wrong indexes in batch to remove image from batch fix is done below total indexes
-                        # index_hitlist2 = label_cachearr[matched_index2] [
-                        #     torch.eq(label_cachearr[matched_index2] , labels)]
-
-
-                        # removing image from batch which got sucessfull hit in cache
-                        total_indexs = torch.tensor(range(len(images)))
-                        index_hitlist = total_indexs[torch.eq(label_cachearr[matched_index] , labels)]
-
-                        #adding cahce hits and sucessful cache hits
-                        cache_hits += label_cachearr[matched_index].shape[0]
-                        successfull_cache_hits += index_hitlist.shape[0]
-
-                        indexes_toremove = index_hitlist
-                        out, c = torch.cat([total_indexs, indexes_toremove]).unique(return_counts=True)
-                        indexes_tokeep = out[c == 1]
-                        images = torch.index_select(images, 0, indexes_tokeep)
-                        labels = torch.index_select(labels, 0, indexes_tokeep)
+                            # clearing feature cache after each batch
+                            feature_cachearr = []
+                            label_cachearr = []
 
                 # forward pass
                 outputs = model(images)
@@ -107,37 +88,42 @@ class TLoopWithExtraction():
                     # extract feature maps of the batch and stack it to cache stack
                     feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
                     out = feature_extractor(images)
-                    feature_cache.append(torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1))
-                    label_cache.append(labels)
+                    feature_cachearr = torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1)
+                    label_cachearr = labels
                     # stacking tensor to concatenate
-                    feature_cachearr = torch.cat(feature_cache)
+                    # feature_cachearr = torch.cat(feature_cache)
                     # feature_cachearr = torch.reshape(feature_cachearr, (
                     # feature_cachearr.size()[0] * feature_cachearr.size()[1], feature_cachearr.size()[2]))
-                    label_cachearr = torch.cat(label_cache).flatten()
+                    # label_cachearr = torch.cat(label_cache).flatten()
                 running_loss += loss.item()
-            print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
-            print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
-            loss_values.append(running_loss / len(train_loader))
-
-            # evaluation of model on test data
-            if (cloned_model == None):
-                Evaluation.Eval(model, epoch, test_loader)
-            else:
-                cloned_model.load_state_dict(
-                    model.state_dict())  # this is recquired so that new weights are tranfered for testing
-                Evaluation.Eval(cloned_model, epoch, test_loader)
-            if (epoch+1 == epochs):
+                # evaluation of model on test data
+                train_accuracy = 0
+                test_accuracy = 0
                 if (cloned_model == None):
-                    print("Accuracy on train set:")
-                    Evaluation.Eval(model, epoch, train_loader)
-                    print("Accuracy on test set:")
-                    Evaluation.Eval(model, epoch, test_loader)
+                    test_accuracy = Evaluation.Eval(model, epoch, test_loader)
                 else:
                     cloned_model.load_state_dict(
                         model.state_dict())  # this is recquired so that new weights are tranfered for testing
-                    print("Accuracy on train set:")
-                    Evaluation.Eval(cloned_model, epoch, train_loader)
-                    print("Accuracy on test set:")
-                    Evaluation.Eval(cloned_model, epoch, test_loader)
+                    test_accuracy = Evaluation.Eval(cloned_model, epoch, test_loader)
+                if (epoch + 1 == epochs):
+                    if (cloned_model == None):
+                        # print("Accuracy on train set:")
+                        train_accuracy = Evaluation.Eval(model, epoch, train_loader)
+                        # print("Accuracy on test set:")
+                        test_accuracy = accuracy = Evaluation.Eval(model, epoch, test_loader)
+                    else:
+                        cloned_model.load_state_dict(
+                            model.state_dict())  # this is recquired so that new weights are tranfered for testing
+                        # accuracy = print("Accuracy on train set:")
+                        train_accuracy = Evaluation.Eval(cloned_model, epoch, train_loader)
+                        # print("Accuracy on test set:")
+                        test_accuracy = Evaluation.Eval(cloned_model, epoch, test_loader)
+                loop.set_description(f"Epoch[{epoch + 1}/{epochs}]")
+                loop.set_postfix(loss=loss.item(), accuracy=test_accuracy, running_loss=running_loss,
+                                 cache_hits=cache_hits, successful_cache_hits=successfull_cache_hits)
+            # print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
+            # print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
+            loss_values.append(running_loss / len(train_loader))
+
         # Plotting Loss Curve
         LossCurve.PlotCurve(loss_values, epochs)
