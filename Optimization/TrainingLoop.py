@@ -53,16 +53,16 @@ class TrainLoop():
 
         if(epoch+1 == epochs and get_final_accuracy):
             if (cloned_model == None):
-                print("Accuracy on train set:")
-                Evaluation.Eval(model, epoch, train_loader)
-                print("Accuracy on test set:")
-                Evaluation.Eval(model, epoch, test_loader)
+                train_accuracy = Evaluation.Eval(model, epoch, train_loader)
+                print("Accuracy on train set: {accuracy}".format(accuracy = train_accuracy))
+                test_accuaracy = Evaluation.Eval(model, epoch, test_loader)
+                print("Accuracy on test set: {accuracy}".format(accuracy=test_accuaracy))
             else:
                 cloned_model.load_state_dict(
                     model.state_dict())  # this is recquired so that new weights are tranfered for testing
-                print("Accuracy on train set:")
-                Evaluation.Eval(cloned_model, epoch, train_loader)
-                print("Accuracy on test set:")
-                Evaluation.Eval(cloned_model, epoch, test_loader)
+                train_accuracy = Evaluation.Eval(model, epoch, train_loader)
+                print("Accuracy on train set: {accuracy}".format(accuracy = train_accuracy))
+                test_accuaracy = Evaluation.Eval(model, epoch, test_loader)
+                print("Accuracy on test set: {accuracy}".format(accuracy=test_accuaracy))
         # Plotting Loss Curve
         LossCurve.PlotCurve(loss_values, epochs)

@@ -158,3 +158,51 @@ class ThreeLayerModelFeatureMap(nn.Module):
         finput = self.fc3(finput)
         finput = self.softmax(finput)
         return finput
+
+class CatAndDogNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=(5, 5), stride=2, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=(5, 5), stride=2, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(3, 3), padding=1)
+        self.fc1 = nn.Linear(in_features=64 * 6 * 6, out_features=500)
+        self.fc2 = nn.Linear(in_features=500, out_features=50)
+        self.fc3 = nn.Linear(in_features=50, out_features=2)
+
+    def forward(self, X):
+        X = F.relu(self.conv1(X))
+        X = F.max_pool2d(X, 2)
+
+        X = F.relu(self.conv2(X))
+        X = F.max_pool2d(X, 2)
+
+        X = F.relu(self.conv3(X))
+        X = F.max_pool2d(X, 2)
+
+        #         print(X.shape)
+        X = X.view(X.shape[0], -1)
+        X = F.relu(self.fc1(X))
+        X = F.relu(self.fc2(X))
+        X = self.fc3(X)
+
+        #         X = torch.sigmoid(X)
+        return X
+
+class CIFAR(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = torch.flatten(x, 1)  # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
