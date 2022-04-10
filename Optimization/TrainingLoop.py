@@ -25,9 +25,10 @@ class TrainLoop():
             running_loss = 0
             batch_counter = 0
             loop = tqdm(enumerate(train_loader), total = len(train_loader), leave=True)
+            accuracy = 0
             for batch_idx,(images, labels) in loop:
                 model.train()
-                # batch_counter += 1
+                batch_counter += 1
                 # print(batch_counter)
                 # forward pass
                 outputs = model(images)
@@ -40,13 +41,14 @@ class TrainLoop():
 
                 running_loss += loss.item()
                 # evaluation of model on test data
-                accuracy = 0
-                if (cloned_model == None):
-                    accuracy = Evaluation.Eval(model, epoch, test_loader)
-                else:
-                    cloned_model.load_state_dict(
-                        model.state_dict())  # this is recquired so that new weights are tranfered for testing
-                    accuracy = Evaluation.Eval(cloned_model, epoch, test_loader)
+                if batch_counter %10 == 0:
+                    if cloned_model is not None:
+                        cloned_model.load_state_dict(
+                            model.state_dict())  # this is recquired so that new weights are tranfered for testing
+                        accuracy = Evaluation.Eval(cloned_model, epoch, test_loader)
+                    else:
+                        accuracy = Evaluation.Eval(model, epoch, test_loader)
+
                 loop.set_description(f"Epoch[{epoch+1}/{epochs}]")
                 loop.set_postfix(loss = loss.item(),accuracy=accuracy,running_loss = running_loss)
             loss_values.append(running_loss / len(train_loader))
