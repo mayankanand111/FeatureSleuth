@@ -19,7 +19,7 @@ class TLoopWithExtraction():
         vector = torch.stack((mean, std), dim=2).flatten(start_dim=1, end_dim=2)
         for i in range(10):
             total_items = vector[torch.where(labels == i)].shape[0]
-            vect_dic[i] = ((vect_dic[i].reshape(1, 30) * count_dic[i]) + torch.sum(vector[torch.where(labels == i)], dim=0, keepdim=True)) / (count_dic[i] + total_items)
+            vect_dic[i] = ((vect_dic[i].reshape(1, 12) * count_dic[i]) + torch.sum(vector[torch.where(labels == i)], dim=0, keepdim=True)) / (count_dic[i] + total_items)
             count_dic[i] += total_items
         return vect_dic, count_dic
 
@@ -51,9 +51,12 @@ class TLoopWithExtraction():
             batch_counter = 0
             loop = tqdm(enumerate(train_loader), total=len(train_loader), leave=True)
             count_dictionary = torch.zeros((10,1))   # this np array is used to store count of each class images that we got so far
-            vector_dictionary = torch.zeros((10,30)) # this is the vector cache that is used to store the latest cahced object for each class
+            vector_dictionary = torch.zeros((10,12)) # this is the vector cache that is used to store the latest cahced object for each class
+            train_accuracy = 0
+            test_accuracy = 0
             for batch_idx, (images, labels) in loop:
                 model.train()
+                batch_counter +=1
                 # if feature cache is not empty than do cosine similarity check
                 if (count_dictionary[0].item() != 0):
                     # print("Current Batch is {} and fmap count is {}".format(batch_counter,len(feature_cachearr)))
@@ -112,14 +115,13 @@ class TLoopWithExtraction():
                     # label_cachearr = torch.cat(label_cache).flatten()
                 running_loss += loss.item()
                 # evaluation of model on test data
-                train_accuracy = 0
-                test_accuracy = 0
-                if (cloned_model == None):
-                    test_accuracy = Evaluation.Eval(model, epoch, test_loader)
-                else:
-                    cloned_model.load_state_dict(
-                        model.state_dict())  # this is recquired so that new weights are tranfered for testing
-                    test_accuracy = Evaluation.Eval(cloned_model, epoch, test_loader)
+                if batch_idx %10 == 0:
+                    if (cloned_model is None):
+                        test_accuracy = Evaluation.Eval(model, epoch, test_loader)
+                    else:
+                        cloned_model.load_state_dict(
+                            model.state_dict())  # this is recquired so that new weights are tranfered for testing
+                        test_accuracy = Evaluation.Eval(cloned_model, epoch, test_loader)
 
                 loop.set_description(f"Epoch[{epoch + 1}/{epochs}]")
                 loop.set_postfix(loss=loss.item(), accuracy=test_accuracy, running_loss=running_loss,
