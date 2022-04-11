@@ -13,15 +13,28 @@ class TLoopWithExtraction():
     def __init__(self):
         self
 
-    def getfeatureVector(out, labels, count_dic, vect_dic):
+    def getfeatureVector(out, labels, count_dic, vect_dic, D_cache):
         std = torch.std(out['conv1'].flatten(start_dim=2, end_dim=3), 2)
         mean = torch.abs(torch.mean(out['conv1'].flatten(start_dim=2, end_dim=3), 2))
         vector = torch.stack((mean, std), dim=2).flatten(start_dim=1, end_dim=2)
         for i in range(10):
             total_items = vector[torch.where(labels == i)].shape[0]
-            vect_dic[i] = ((vect_dic[i].reshape(1, 12) * count_dic[i]) + torch.sum(vector[torch.where(labels == i)], dim=0, keepdim=True)) / (count_dic[i] + total_items)
+            V_cached = vect_dic[i].reshape(1, 30)
+            V_new = vector[torch.where(labels == i)]
+
+            #Updatig Vector cache
+            vect_dic[i] = ((V_cached * count_dic[i]) + torch.sum(V_new, dim=0, keepdim=True)) / (count_dic[i] + total_items)
             count_dic[i] += total_items
-        return vect_dic, count_dic
+
+            #updating threshold dictionary below
+            Z_norm = torch.linalg.norm(V_cached, dim=1, keepdim=True)  # Size (n, 1).
+            B_norm = torch.linalg.norm(V_new, dim=1, keepdim=True)  # Size (1, b).
+            cosine_similarity = ((V_cached @ V_new.T) / (Z_norm @ B_norm.T)).T
+            cosine_similarity = cosine_similarity.T
+            D_new = cosine_similarity
+            D_cache[i] = ((D_cache[i] * count_dic[i]) + torch.sum(D_new)) / (count_dic[i] + total_items)
+
+        return vect_dic, count_dic, D_cache+0.0001
 
     def getcurrentbatchVectors(newBatchFeatureMaps):
         std = torch.std(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), 2)
@@ -51,8 +64,9 @@ class TLoopWithExtraction():
             batch_counter = 0
             loop = tqdm(enumerate(train_loader), total=len(train_loader), leave=True)
             count_dictionary = torch.zeros((10,1))   # this np array is used to store count of each class images that we got so far
-            vector_dictionary = torch.zeros((10,12)) # this is the vector cache that is used to store the latest cahced object for each class
-            train_accuracy = 0
+            vector_dictionary = torch.zeros((10,30)) # this is the vector cache that is used to store the latest cahced object for each class
+            threshold_dictionary = torch.zeros((10,1)) # this is used to store the threshold fo each class to obtain cache hit or miss
+            rain_accuracy = 0
             test_accuracy = 0
             for batch_idx, (images, labels) in loop:
                 model.train()
@@ -75,16 +89,28 @@ class TLoopWithExtraction():
                             cosine_similarity = cosine_similarity.T
                             predicted_labels = torch.argmax(cosine_similarity, dim=1)
 
+                            cache_hits += predicted_labels.shape[0]
+
+
+                            value = torch.max(cosine_similarity, dim=1)
+                            threshold_vector = torch.tensor([(lambda x: threshold_dictionary[x])(x) for x in predicted_labels])
+
+                            threshold_index = torch.where(value[0] >= threshold_vector)
+
+                            labels_temp = labels.detach().clone()
+                            labels_temp = labels_temp[threshold_index[0]]
+                            predicted_labels = predicted_labels[threshold_index[0]]
+
                             # removing image from batch which got sucessfull hit in cache
-                            total_indexs = torch.tensor(range(len(images)))
-                            index_hitlist = total_indexs[torch.eq(predicted_labels, labels)]
+                            index_hitlist = threshold_index[0][torch.eq(predicted_labels, labels_temp)]
+
+                            total_index = torch.tensor(range(64))
 
                             # adding cahce hits and sucessful cache hits
-                            cache_hits += predicted_labels.shape[0]
                             successfull_cache_hits += index_hitlist.shape[0]
 
                             indexes_toremove = index_hitlist
-                            out, c = torch.cat([total_indexs, indexes_toremove]).unique(return_counts=True)
+                            out, c = torch.cat([total_index, indexes_toremove]).unique(return_counts=True)
                             indexes_tokeep = out[c == 1]
                             images = torch.index_select(images, 0, indexes_tokeep)
                             labels = torch.index_select(labels, 0, indexes_tokeep)
@@ -105,7 +131,7 @@ class TLoopWithExtraction():
                     # extract feature maps of the batch and stack it to cache stack
                     feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
                     out = feature_extractor(images)
-                    vector_dictionary,count_dictionary = TLoopWithExtraction.getfeatureVector(out,labels,count_dictionary,vector_dictionary)
+                    vector_dictionary,count_dictionary,threshold_dictionary = TLoopWithExtraction.getfeatureVector(out,labels,count_dictionary,vector_dictionary,threshold_dictionary)
                     # feature_cachearr =  torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1)
                     # label_cachearr = labels
                     # stacking tensor to concatenate
