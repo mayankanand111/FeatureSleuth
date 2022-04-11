@@ -124,6 +124,23 @@ class Test_Loader:
         return test_loader
 
 
+class FashionMNISTLoader:
+    def __init__(self):
+        self
+
+    def load_test_and_trainset(self, batch_size, shuffle=True):
+        T = torchvision.transforms.Compose([
+            torchvision.transforms.ToTensor()
+        ])
+        train_data = torchvision.datasets.FashionMNIST("./data/mnist/train_data", train=True, download=True,
+                                                       transform=T)
+        test_data = torchvision.datasets.FashionMNIST("./data/mnist/test_data", train=False, download=True, transform=T)
+
+        train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=shuffle)
+        test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=shuffle)
+        return train_loader, test_loader
+
+
 class Feature_loader:
     def __init__(self):
         self

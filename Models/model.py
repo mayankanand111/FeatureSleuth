@@ -10,18 +10,19 @@ class BaseModel(nn.Module):
         self.pool1 = nn.MaxPool2d(kernel_size=2)
         self.conv2 = nn.Conv2d(in_channels=15, out_channels=30, kernel_size=5)
         self.pool2 = nn.MaxPool2d(kernel_size=2)
-        self.fc1 = nn.Linear(480 ,64)
-        self.fc2 = nn.Linear(64 ,10)
+        self.fc1 = nn.Linear(480, 64)
+        self.fc2 = nn.Linear(64, 10)
         self.softmax = nn.LogSoftmax()
 
-    def forward(self ,finput):
+    def forward(self, finput):
         finput = torch.relu(self.pool1(self.conv1(finput)))
         finput = torch.relu(self.pool2(self.conv2(finput)))
-        finput = torch.flatten(finput ,start_dim=1)
+        finput = torch.flatten(finput, start_dim=1)
         finput = torch.relu(self.fc1(finput))
         finput = self.fc2(finput)
         finput = self.softmax(finput)
         return finput
+
 
 class BaseModelWithTwoDigits1(nn.Module):
     def __init__(self, padding_digits=0):
@@ -54,18 +55,19 @@ class BaseModelWithSigmoid(nn.Module):
         self.pool1 = nn.MaxPool2d(kernel_size=2)
         self.conv2 = nn.Conv2d(in_channels=15, out_channels=30, kernel_size=5)
         self.pool2 = nn.MaxPool2d(kernel_size=2)
-        self.fc1 = nn.Linear(480 ,64)
-        self.fc2 = nn.Linear(64 ,10)
+        self.fc1 = nn.Linear(480, 64)
+        self.fc2 = nn.Linear(64, 10)
         self.softmax = nn.LogSoftmax()
 
-    def forward(self ,finput):
+    def forward(self, finput):
         finput = torch.sigmoid(self.pool1(self.conv1(finput)))
         finput = torch.sigmoid(self.pool2(self.conv2(finput)))
-        finput = torch.flatten(finput ,start_dim=1)
+        finput = torch.flatten(finput, start_dim=1)
         finput = torch.sigmoid(self.fc1(finput))
         finput = self.fc2(finput)
         finput = self.softmax(finput)
         return finput
+
 
 class BaseModelWithTwoDigits(nn.Module):
     def __init__(self, padding_digits=0):
@@ -159,6 +161,7 @@ class ThreeLayerModelFeatureMap(nn.Module):
         finput = self.softmax(finput)
         return finput
 
+
 class CatAndDogNet(nn.Module):
     def __init__(self):
         super().__init__()
@@ -188,6 +191,7 @@ class CatAndDogNet(nn.Module):
         #         X = torch.sigmoid(X)
         return X
 
+
 class CIFAR(nn.Module):
     def __init__(self):
         super().__init__()
@@ -207,9 +211,10 @@ class CIFAR(nn.Module):
         x = self.fc3(x)
         return x
 
+
 class FashionMnistModel(nn.Module):
 
-    def __init__(self):
+    def __init__(self, padding=1):
         super(FashionMnistModel, self).__init__()
 
         self.layer1 = nn.Sequential(
@@ -230,6 +235,7 @@ class FashionMnistModel(nn.Module):
         self.drop = nn.Dropout2d(0.25)
         self.fc2 = nn.Linear(in_features=600, out_features=120)
         self.fc3 = nn.Linear(in_features=120, out_features=10)
+        self.softmax = nn.LogSoftmax()
 
     def forward(self, x):
         out = self.layer1(x)
@@ -239,6 +245,6 @@ class FashionMnistModel(nn.Module):
         out = self.drop(out)
         out = self.fc2(out)
         out = self.fc3(out)
+        out = self.softmax(out)
 
         return out
-

@@ -1,18 +1,12 @@
-from lib2to3.pytree import Base
-import Models.model
-import torch
-from DataLoader import Loader
 import hydra
-from hydra.core.config_store  import ConfigStore
-from Models.model import BaseModel, BaseModelWithSigmoid,ThreeLayerModel
+import torchvision
+from hydra.core.config_store import ConfigStore
+from torch.utils.data import DataLoader
+
+from Conf.DataConfig import MNISTConfig
+from Models.model import BaseModel
 from Optimization.TLoopWithExtraction import TLoopWithExtraction
 from Optimization.TrainingLoop import TrainLoop
-from Conf import DataConfig
-from Conf.DataConfig import MNISTConfig
-from Research.DataAnalysis import LoadData
-import torchvision
-from torch.utils.data import DataLoader, random_split
-
 
 cs = ConfigStore.instance()
 cs.store(name="mnsit_config", node=MNISTConfig)
