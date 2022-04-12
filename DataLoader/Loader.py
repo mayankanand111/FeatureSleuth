@@ -36,7 +36,7 @@ class MNISTDataset(Dataset):
 
 class TensorDataset(Dataset):
     def __init__(self, tensors, labels=None):
-        tensors = torch.reshape(tensors, (len(tensors), 1, 24, 24))
+        # tensors = torch.reshape(tensors, (len(tensors), 1, 24, 24))
         # print(tensors.shape)
         self.X = tensors
         self.y = labels
@@ -48,7 +48,7 @@ class TensorDataset(Dataset):
         data = self.X[i]
         # data = np.asarray(data)
 
-        data = transform(data)
+        # data = transform(data)
         # print("Inside tensor loader", data.shape)
 
         if self.y is not None:
@@ -57,10 +57,14 @@ class TensorDataset(Dataset):
             return data.float()
 
     def append(self, tensors, labels):
-        tensors = torch.reshape(tensors, (len(tensors), 1, 24, 24))
+        # tensors = torch.reshape(tensors, (len(tensors), 1, 24, 24))
         # print(tensors.shape)
-        self.X = torch.cat((self.X, tensors), 0)
-        self.y = torch.cat((self.y, labels), 0)
+        if self.X is None:
+            self.X = tensors
+            self.y = labels
+        else:
+            self.X = torch.cat((self.X, tensors), 0)
+            self.y = torch.cat((self.y, labels), 0)
 
 
 class FeatureDataset(Dataset):
@@ -139,6 +143,15 @@ class FashionMNISTLoader:
         train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=shuffle)
         test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=shuffle)
         return train_loader, test_loader
+
+
+class PerturbImageLoader:
+    def __init__(self, tensor_dataset):
+        self.tensor_dataset = tensor_dataset
+
+    def get(self, batch_size, shuffle=True):
+        perturb_image_loader = DataLoader(self.tensor_dataset, batch_size, shuffle)
+        return perturb_image_loader
 
 
 class Feature_loader:

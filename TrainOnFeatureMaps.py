@@ -1,4 +1,5 @@
 import hydra
+import torch
 from hydra.core.config_store import ConfigStore
 
 from Conf.DataConfig import MNISTConfig
@@ -25,20 +26,26 @@ def test_mnist_dataset(cfg: MNISTConfig) -> None:
 
     # load the existing model
     mnist_base_model = BaseModel()
+    # path = cfg.params.pretrain_model_path
+    # mnist_base_model.load_state_dict(torch.load(path + mnist_base_model.__class__.__name__))
 
     TrainLoop.Tloop(mnist_base_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer,
                     cfg.hyperparams.learning_rate,
                     train_loader, test_loader)
+    #
+    # # Saving model trained weights
+    # path = cfg.params.pretrain_model_path
+    # torch.save(mnist_base_model.state_dict(), path + mnist_base_model.__class__.__name__)
+    # print('Trained model : {} saved at {path}'.format(mnist_base_model.__class__.__name__, path=path))
 
-    mnist_feature_model = BaseModelFeatureMap()
-    mnist_feature_model.load_state_dict(mnist_base_model.state_dict())
     feature_extraction_layers = ['conv1']
     # extracting feature maps
     train_images, train_labels = FmapExtract.getfeatures_from_loader(train_loader, mnist_base_model,
                                                                      feature_extraction_layers,
-                                                                     sum_up_feature_channels=True)
+                                                                     sum_up_feature_channels=False)
     feature_loader = Loader.Feature_loader.create_feature_loader(train_images, train_labels, cfg.hyperparams.batch_size)
-
+    mnist_feature_model = BaseModelFeatureMap()
+    mnist_feature_model.load_state_dict(mnist_base_model.state_dict())
     # calling Training Loop
     TrainLoop.Tloop(mnist_feature_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer,
                     cfg.hyperparams.learning_rate,
@@ -94,5 +101,5 @@ def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
 
 
 if __name__ == "__main__":
-    # test_mnist_dataset()
-    test_fashion_mnist_dataset()
+    test_mnist_dataset()
+    # test_fashion_mnist_dataset()

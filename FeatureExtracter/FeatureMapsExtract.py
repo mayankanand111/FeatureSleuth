@@ -8,22 +8,22 @@ from torchvision.models.feature_extraction import create_feature_extractor
 class FmapExtract:
 
     def extract_featuremaps(batch_images, model, feature_extraction_layers):
-        model_weights = []
-        conv_layers = []
-        model_children = list(model.children())
-        counter = 0
-        for i in range(len(model_children)):
-            if type(model_children[i]) == nn.Conv2d:
-                counter += 1
-                model_weights.append(model_children[i].weight)
-                conv_layers.append(model_children[i])
-            elif type(model_children[i]) == nn.Sequential:
-                for j in range(len(model_children[i])):
-                    for child in model_children[i][j].children():
-                        if type(child) == nn.Conv2d:
-                            counter += 1
-                            model_weights.append(child.weight)
-                            conv_layers.append(child)
+        # model_weights = []
+        # conv_layers = []
+        # model_children = list(model.children())
+        # counter = 0
+        # for i in range(len(model_children)):
+        #     if type(model_children[i]) == nn.Conv2d:
+        #         counter += 1
+        #         model_weights.append(model_children[i].weight)
+        #         conv_layers.append(model_children[i])
+        #     elif type(model_children[i]) == nn.Sequential:
+        #         for j in range(len(model_children[i])):
+        #             for child in model_children[i][j].children():
+        #                 if type(child) == nn.Conv2d:
+        #                     counter += 1
+        #                     model_weights.append(child.weight)
+        #                     conv_layers.append(child)
 
         feature_extractor = create_feature_extractor(model, return_nodes=feature_extraction_layers)
         feature_map_images = feature_extractor(batch_images)
