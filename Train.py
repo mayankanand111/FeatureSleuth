@@ -31,8 +31,8 @@ def main(cfg: MNISTConfig) -> None:
     del model
 
     model_new = BaseModel()
-
-    TLoopWithExtraction.Tloop_Extraction(model_new,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
+    firstlayername = "conv1"
+    TLoopWithExtraction.Tloop_Extraction(model_new,firstlayername,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
     del model_new
 
     # # Saving model trained weights
