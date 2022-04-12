@@ -103,7 +103,7 @@ class Train_Loader:
 
         train_data = MNISTDataset(train_data_images, train_label, transform)
 
-        train_loader = DataLoader(train_data, batch_size, shuffle=True, drop_last=True)
+        train_loader = DataLoader(train_data, batch_size, shuffle=True, drop_last=False)
         return train_loader
 
 
@@ -124,7 +124,7 @@ class Test_Loader:
 
         test_data = MNISTDataset(test_data_images, test_label, transform)
 
-        test_loader = DataLoader(test_data, batch_size, shuffle=True, drop_last=True)
+        test_loader = DataLoader(test_data, batch_size, shuffle=True, drop_last=False)
         return test_loader
 
 

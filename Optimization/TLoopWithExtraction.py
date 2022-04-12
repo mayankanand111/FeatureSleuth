@@ -22,19 +22,24 @@ class TLoopWithExtraction():
             V_cached = vect_dic[i].reshape(1, 30)
             V_new = vector[torch.where(labels == i)]
 
-            #Updatig Vector cache
-            vect_dic[i] = ((V_cached * count_dic[i]) + torch.sum(V_new, dim=0, keepdim=True)) / (count_dic[i] + total_items)
-            count_dic[i] += total_items
-
-            #updating threshold dictionary below
+            # updating threshold dictionary below
             Z_norm = torch.linalg.norm(V_cached, dim=1, keepdim=True)  # Size (n, 1).
             B_norm = torch.linalg.norm(V_new, dim=1, keepdim=True)  # Size (1, b).
             cosine_similarity = ((V_cached @ V_new.T) / (Z_norm @ B_norm.T)).T
             cosine_similarity = cosine_similarity.T
             D_new = cosine_similarity
-            D_cache[i] = ((D_cache[i] * count_dic[i]) + torch.sum(D_new)) / (count_dic[i] + total_items)
+            if torch.isnan(torch.sum(D_new)):
+                D_cache[i] = 0
+            else:
+                D_cache[i] = ((D_cache[i] * count_dic[i]) + torch.sum(D_new)) / (count_dic[i] + total_items)
 
-        return vect_dic, count_dic, D_cache+0.0001
+
+            #Updatig Vector cache
+            vect_dic[i] = ((V_cached * count_dic[i]) + torch.sum(V_new, dim=0, keepdim=True)) / (count_dic[i] + total_items)
+            count_dic[i] += total_items
+
+
+        return vect_dic, count_dic, D_cache
 
     def getcurrentbatchVectors(newBatchFeatureMaps):
         std = torch.std(newBatchFeatureMaps['conv1'].flatten(start_dim=2, end_dim=3), 2)
@@ -53,6 +58,9 @@ class TLoopWithExtraction():
             optimizer = torch.optim.SGD(model.parameters(), learning_rate)
 
         loss_values = []
+        # count_dictionary = torch.zeros((10,1))   # this np array is used to store count of each class images that we got so far
+        # vector_dictionary = torch.zeros((10,30)) # this is the vector cache that is used to store the latest cahced object for each class
+        # threshold_dictionary = torch.zeros((10,1)) # this is used to store the threshold fo each class to obtain cache hit or miss
         for epoch in range(epochs):
             running_loss = 0
             feature_cache = []
@@ -68,6 +76,7 @@ class TLoopWithExtraction():
             threshold_dictionary = torch.zeros((10,1)) # this is used to store the threshold fo each class to obtain cache hit or miss
             rain_accuracy = 0
             test_accuracy = 0
+            totalimagessentfortraining = 0
             for batch_idx, (images, labels) in loop:
                 model.train()
                 batch_counter +=1
@@ -95,6 +104,7 @@ class TLoopWithExtraction():
                             value = torch.max(cosine_similarity, dim=1)
                             threshold_vector = torch.tensor([(lambda x: threshold_dictionary[x])(x) for x in predicted_labels])
 
+                            # threshold index gives us indexes in batch which satisfy threshold
                             threshold_index = torch.where(value[0] >= threshold_vector)
 
                             labels_temp = labels.detach().clone()
@@ -104,7 +114,7 @@ class TLoopWithExtraction():
                             # removing image from batch which got sucessfull hit in cache
                             index_hitlist = threshold_index[0][torch.eq(predicted_labels, labels_temp)]
 
-                            total_index = torch.tensor(range(64))
+                            total_index = torch.tensor(range(len(images)))
 
                             # adding cahce hits and sucessful cache hits
                             successfull_cache_hits += index_hitlist.shape[0]
@@ -114,11 +124,12 @@ class TLoopWithExtraction():
                             indexes_tokeep = out[c == 1]
                             images = torch.index_select(images, 0, indexes_tokeep)
                             labels = torch.index_select(labels, 0, indexes_tokeep)
-
+                            totalimagessentfortraining += len(images) # this will give us count of images trained per batch
                             # # clearing feature cache after each batch
                             # feature_cachearr = []
                             # label_cachearr = []
-
+                else:
+                    totalimagessentfortraining+=len(images)
                 # forward pass
                 outputs = model(images)
                 # finding loss
@@ -141,7 +152,7 @@ class TLoopWithExtraction():
                     # label_cachearr = torch.cat(label_cache).flatten()
                 running_loss += loss.item()
                 # evaluation of model on test data
-                if batch_idx %10 == 0:
+                if batch_idx %10 == 0 or batch_counter == len(train_loader):
                     if (cloned_model is None):
                         test_accuracy = Evaluation.Eval(model, epoch, test_loader)
                     else:
@@ -151,7 +162,7 @@ class TLoopWithExtraction():
 
                 loop.set_description(f"Epoch[{epoch + 1}/{epochs}]")
                 loop.set_postfix(loss=loss.item(), accuracy=test_accuracy, running_loss=running_loss,
-                                 cache_hits=cache_hits, successful_cache_hits=successfull_cache_hits)
+                                 cache_hits=cache_hits, successful_cache_hits=successfull_cache_hits, total_images_trained=totalimagessentfortraining)
             # print("Total cache hits in {} epoch are : {}".format(epoch,cache_hits))
             # print("Total successful cache hits in {} epoch are : {}".format(epoch, successfull_cache_hits))
             loss_values.append(running_loss / len(train_loader))

@@ -42,7 +42,7 @@ class TrainLoop():
 
                 running_loss += loss.item()
                 # evaluation of model on test data
-                if batch_counter % 10 == 0:
+                if batch_counter % 10 == 0 or batch_counter == len(train_loader):
                     if cloned_model is not None:
                         cloned_model.load_state_dict(
                             model.state_dict())  # this is recquired so that new weights are tranfered for testing
