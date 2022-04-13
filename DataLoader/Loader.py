@@ -4,6 +4,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
+import torch.utils.data as data
 
 transform = transforms.Compose(
     [transforms.ToPILImage(),
@@ -84,6 +85,29 @@ class FeatureDataset(Dataset):
             return (data, self.y[i])
         else:
             return data
+
+
+class Train_Val_Loader:
+
+    def __init__(self):
+        self
+
+    def load_train_dataset(datapath, labelpath, batch_size, shuffle=True):
+        file_reader = gzip.open(datapath, 'r')
+        file_reader.read(16)
+        buf = file_reader.read(28 * 28 * 60000)
+        train_data_images = np.frombuffer(buf, dtype=np.uint8).astype(np.int32)
+        train_data_images = np.reshape(train_data_images, (60000, 28, 28))
+        file_reader = gzip.open(labelpath, 'r')
+        buf = file_reader.read()
+        train_label = np.frombuffer(buf, dtype=np.uint8, offset=8)
+
+        train_data = MNISTDataset(train_data_images, train_label, transform)
+        train_set, validation_set = data.random_split(train_data, [50000, 10000])
+
+        train_loader = DataLoader(train_set, batch_size, shuffle=True, drop_last=True)
+        validation_loader = DataLoader(validation_set, batch_size, shuffle=True, drop_last=True)
+        return train_loader, validation_loader
 
 
 class Train_Loader:

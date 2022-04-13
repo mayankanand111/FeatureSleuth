@@ -1,5 +1,4 @@
 import hydra
-import torch
 from hydra.core.config_store import ConfigStore
 
 from Conf.DataConfig import MNISTConfig
@@ -16,6 +15,9 @@ cs.store(name="mnsit_config", node=MNISTConfig)
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def test_mnist_dataset(cfg: MNISTConfig) -> None:
+    print("Experiment on MNIST Dataset")
+    print(f'Batch-size: {cfg.hyperparams.batch_size}')
+    print(f'Learning-rate: {cfg.hyperparams.learning_rate}')
     # loading train loader to extract feature maps
     train_loader = Loader.Train_Loader.load_train_dataset(cfg.params.train_data_path, cfg.params.train_labels_path,
                                                           cfg.hyperparams.batch_size)
@@ -64,6 +66,9 @@ def test_mnist_dataset(cfg: MNISTConfig) -> None:
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
+    print("Experiment on Fashion MNIST Dataset")
+    print("Batch-size: {cfg.hyperparams.batch_size}")
+    print("Learning-rate: {cfg.hyperparams.learning_rate}")
     # loading train loader to extract feature maps
     fashion_mnist_loader = FashionMNISTLoader()
     train_loader, test_loader = fashion_mnist_loader.load_test_and_trainset(cfg.hyperparams.batch_size)

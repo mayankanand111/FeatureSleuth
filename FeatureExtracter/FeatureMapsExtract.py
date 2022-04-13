@@ -33,18 +33,21 @@ class FmapExtract:
     def getfeatures_from_loader(input_loader, model, feature_extraction_layers, sum_up_feature_channels=True):
         feature_maps = None
         train_labels = None
-        # counter = 0
-        # stop_counter_at = len(input_loader)/20
+        counter = 0
+        stop_counter_at = len(input_loader) / 20
         for images, labels in input_loader:
-            # if not sum_up_feature_channels and counter >= stop_counter_at:
-            #     print("counter stopped at", counter)
-            #     break
+            if not sum_up_feature_channels and counter >= stop_counter_at:
+                # print("counter stopped at", counter)
+                break
             feature_map_dict = FmapExtract.extract_featuremaps(images, model, feature_extraction_layers)
             for layer in feature_map_dict.keys():
                 if sum_up_feature_channels:
                     if feature_maps is None:
                         size = feature_map_dict[layer][0].shape[1]
-                        temp = torch.sum(feature_map_dict[layer].flatten(start_dim=2, end_dim=3), dim=1)
+                        # temp = torch.sum(feature_map_dict[layer].flatten(start_dim=2, end_dim=3), dim=1)
+                        temp = torch.sum(
+                            feature_map_dict[layer].reshape(len(images), feature_map_dict[layer][0].shape[0],
+                                                            size * size), dim=1)
                         temp = temp.reshape(len(images), 1, size, size)
                         feature_maps = temp
                         train_labels = labels
@@ -65,7 +68,7 @@ class FmapExtract:
                         train_labels = labels.repeat_interleave(temp.shape[1])
                     else:
                         train_labels = torch.cat((train_labels, labels.repeat_interleave(temp.shape[1])))
-            # counter += 1
+            counter += 1
         return [t.detach().numpy() for t in feature_maps], np.array(train_labels, dtype=np.uint8)
 
     # def get_feature_maps(model, batch_images):
