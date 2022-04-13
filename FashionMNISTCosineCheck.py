@@ -4,7 +4,7 @@ from hydra.core.config_store import ConfigStore
 from torch.utils.data import DataLoader
 
 from Conf.DataConfig import MNISTConfig
-from Models.model import BaseModel
+from Models.model import BaseModel, FashionMnistModel
 from Optimization.TLoopWithExtraction import TLoopWithExtraction
 from Optimization.TrainingLoop import TrainLoop
 
@@ -26,16 +26,16 @@ def main(cfg: MNISTConfig) -> None:
     train_loader = DataLoader(train_data, batch_size = cfg.hyperparams.batch_size, shuffle=True)
     test_loader = DataLoader(test_data, batch_size = cfg.hyperparams.batch_size, shuffle=True)
 
-    # creating model
-    model = BaseModel()
-    
+    #creating model
+    model = FashionMnistModel()
+
     #calling Training Loop
     TrainLoop.Tloop(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
     del model
 
-    model = BaseModel()
-
-    TLoopWithExtraction.Tloop_Extraction(model,cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
+    model = FashionMnistModel()
+    firstlayername = "layer1"
+    TLoopWithExtraction.Tloop_Extraction(model,32,firstlayername, cfg.hyperparams.epochs,cfg.hyperparams.optimizer,cfg.hyperparams.learning_rate,train_loader,test_loader)
     del model
     
     # # Saving model trained weights

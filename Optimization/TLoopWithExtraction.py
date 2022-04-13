@@ -47,7 +47,7 @@ class TLoopWithExtraction():
         vector = torch.stack((mean, std), dim=2).flatten(start_dim=1, end_dim=2)
         return vector
 
-    def Tloop_Extraction(model,firstlayername, epochs, optimizer, learning_rate, train_loader, test_loader, cloned_model=None):
+    def Tloop_Extraction(model,out_params,firstlayername, epochs, optimizer, learning_rate, train_loader, test_loader, cloned_model=None):
         # loss criteria
         loss_criterion = nn.NLLLoss()
 
@@ -70,7 +70,7 @@ class TLoopWithExtraction():
             cache_hits = 0
             successfull_cache_hits = 0
             batch_counter = 0
-            out_params = model._modules[firstlayername].bias.shape[0]
+            out_params = out_params
             loop = tqdm(enumerate(train_loader), total=len(train_loader), leave=True)
             count_dictionary = torch.zeros((10,1))   # this np array is used to store count of each class images that we got so far
             vector_dictionary = torch.zeros((10,out_params*2)) # this is the vector cache that is used to store the latest cahced object for each class
@@ -140,7 +140,7 @@ class TLoopWithExtraction():
                 optimizer.step()
                 with torch.no_grad():
                     # extract feature maps of the batch and stack it to cache stack
-                    feature_extractor = create_feature_extractor(model, return_nodes=['conv1'])
+                    feature_extractor = create_feature_extractor(model, return_nodes=[firstlayername])
                     out = feature_extractor(images)
                     vector_dictionary,count_dictionary,threshold_dictionary = TLoopWithExtraction.getfeatureVector(out,labels,count_dictionary,vector_dictionary,threshold_dictionary,firstlayername,out_params)
                     # feature_cachearr =  torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1)
