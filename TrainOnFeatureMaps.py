@@ -12,6 +12,20 @@ from Optimization.TrainingLoop import TrainLoop
 cs = ConfigStore.instance()
 cs.store(name="mnsit_config", node=MNISTConfig)
 
+'''
+This file has the experiments related to training model on feature maps.
+There are two datasets - MNIST and fashion MNIST. For these two datasets two methods
+are written. Before running this file, uncomment the method(which specifies the dataset)
+that you want that is the end of the file.  
+To run the file rightclick->Run 'TrainOnFeatureMaps'. 
+As a part of this experiment, we will train a base model on a dataset(either MNIST 
+or Fashion MNIST), extract feature maps for all the images or part of the images based on 
+a param value 'sum_up_feature_channels', and transfer the weights to feature map model and 
+train this feature map model on the feature maps generated. We then evaluate both the models
+against the test set.
+Note: Fashion MNIST dataset will be downloaded from the internet.
+'''
+
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def test_mnist_dataset(cfg: MNISTConfig) -> None:
@@ -49,7 +63,7 @@ def test_mnist_dataset(cfg: MNISTConfig) -> None:
     mnist_feature_model = BaseModelFeatureMap()
     mnist_feature_model.load_state_dict(mnist_base_model.state_dict())
     # calling Training Loop
-    TrainLoop.Tloop(mnist_feature_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer,
+    TrainLoop.Tloop(mnist_feature_model, 2, cfg.hyperparams.optimizer,
                     cfg.hyperparams.learning_rate,
                     feature_loader, test_loader, mnist_base_model, get_final_accuracy=False)
 
@@ -67,8 +81,8 @@ def test_mnist_dataset(cfg: MNISTConfig) -> None:
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
     print("Experiment on Fashion MNIST Dataset")
-    print("Batch-size: {cfg.hyperparams.batch_size}")
-    print("Learning-rate: {cfg.hyperparams.learning_rate}")
+    print(f'Batch-size: {cfg.hyperparams.batch_size}')
+    print(f'Learning-rate: {cfg.hyperparams.learning_rate}')
     # loading train loader to extract feature maps
     fashion_mnist_loader = FashionMNISTLoader()
     train_loader, test_loader = fashion_mnist_loader.load_test_and_trainset(cfg.hyperparams.batch_size)
@@ -88,7 +102,7 @@ def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
     feature_loader = Loader.Feature_loader.create_feature_loader(train_images, train_labels, cfg.hyperparams.batch_size)
 
     # calling Training Loop
-    TrainLoop.Tloop(fashion_mnist_feature_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer,
+    TrainLoop.Tloop(fashion_mnist_feature_model, 2, cfg.hyperparams.optimizer,
                     cfg.hyperparams.learning_rate, feature_loader, test_loader, fashion_mnist_model,
                     get_final_accuracy=False)
 

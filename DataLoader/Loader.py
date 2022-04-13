@@ -6,6 +6,9 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 import torch.utils.data as data
 
+'''
+This file has all the data loaders used in various experiments.
+'''
 transform = transforms.Compose(
     [transforms.ToPILImage(),
      transforms.ToTensor(),

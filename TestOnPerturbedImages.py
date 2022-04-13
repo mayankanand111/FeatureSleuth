@@ -14,6 +14,21 @@ from Optimization.TrainingLoop import TrainLoop
 cs = ConfigStore.instance()
 cs.store(name="mnsit_config", node=MNISTConfig)
 
+'''
+This file has the experiments related to training model on feature maps and 
+checking it on the perturbed images.
+For this experiment, MNIST dataset is used. 
+To run the file rightclick -> Run 'TestOnPerturbedImages'. 
+As a part of this experiment, we will first train a base model on MNIST dataset. Then
+feature maps are extracted for all the images or part of the images based on a param 
+value 'sum_up_feature_channels', and then perturbed images are generated using the same 
+model. Base model is first evaluated on the generated perturbed images and then
+feature map model is trained on the feature maps. Once done, feature map model is evaluated 
+on the generated perturbed images.
+For generating perturbed images 10k of the train images are taken and the base model is trained
+only on the remaining 50k images. Also feature map model is trained on the feature maps
+extracted from these images.
+'''
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def test_on_pertub_Images(cfg: MNISTConfig) -> None:
@@ -68,7 +83,7 @@ def test_on_pertub_Images(cfg: MNISTConfig) -> None:
     mnist_feature_model = BaseModelFeatureMap()
     mnist_feature_model.load_state_dict(mnist_base_model.state_dict())
     # calling Training Loop
-    TrainLoop.Tloop(mnist_feature_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer,
+    TrainLoop.Tloop(mnist_feature_model, 2, cfg.hyperparams.optimizer,
                     cfg.hyperparams.learning_rate,
                     feature_loader, test_loader, mnist_base_model, get_final_accuracy=False)
 

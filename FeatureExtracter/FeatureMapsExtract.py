@@ -1,10 +1,19 @@
-import numpy
+
 import torch
-import torch.nn as nn
 import numpy as np
 from torchvision.models.feature_extraction import create_feature_extractor
 
-
+'''
+This file is a helper class for TrainOnFeatureMaps.py. 
+It has two methods -
+getfeatures_from_loader-> which takes a loader and a model to generate the feature maps 
+    for the specified layers. This also takes one more param 'sum_up_feature_channels' 
+    which when set to True, sums up the multiple feature maps generated for an image 
+    to one feature map image. In case the param is False, only 1/10 th of the total 
+    images will be used to generate the feature maps as generating feature maps for all the
+    images will produce around 1 million images(atleast on MNIST and fashion MNIST datasets)
+extract_featuremaps -> which extracts a feature maps from the specified layer of the model
+'''
 class FmapExtract:
 
     def extract_featuremaps(batch_images, model, feature_extraction_layers):
@@ -34,7 +43,7 @@ class FmapExtract:
         feature_maps = None
         train_labels = None
         counter = 0
-        stop_counter_at = len(input_loader) / 20
+        stop_counter_at = len(input_loader) / 10
         for images, labels in input_loader:
             if not sum_up_feature_channels and counter >= stop_counter_at:
                 # print("counter stopped at", counter)
