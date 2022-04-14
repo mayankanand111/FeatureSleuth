@@ -114,3 +114,100 @@ We would like to experiment we would like to consider images of two numbers from
 set and take all the feature maps obtained after each convolution layer. We will then pass these feature
 maps as input images to a new model with the same architecture, and this new model is tested against
 the original images taken from the MNIST data set for two numbers
+
+
+Results after 3rd April
+
+Params----Batch size: 256, sum_up_feature_channels=False, stop_counter_at = len(input_loader)/10
+
+PyDev console: starting.
+Python 3.8.13 (default, Mar 28 2022, 06:16:26)
+[Clang 12.0.0 ] on darwin
+runfile('/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth/TrainOnFeatureMaps.py', wdir='/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth')
+  0%|          | 0/234 [00:00<?, ?it/s]/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth/Models/model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/5]: 100%|██████████| 234/234 [00:43<00:00,  5.32it/s, accuracy=97, loss=0.0851, running_loss=97.7]
+Epoch[2/5]: 100%|██████████| 234/234 [00:43<00:00,  5.39it/s, accuracy=97.7, loss=0.0818, running_loss=21.3]
+Epoch[3/5]: 100%|██████████| 234/234 [00:43<00:00,  5.43it/s, accuracy=97.8, loss=0.0563, running_loss=15.8]
+Epoch[4/5]: 100%|██████████| 234/234 [00:44<00:00,  5.31it/s, accuracy=98.1, loss=0.0333, running_loss=12.7]
+Epoch[5/5]: 100%|██████████| 234/234 [00:43<00:00,  5.43it/s, accuracy=98.3, loss=0.0513, running_loss=10.7]
+Accuracy on train set: 98.61444978632478
+Accuracy on test set: 98.26722756410257
+counter stopped at 24
+  0%|          | 0/360 [00:00<?, ?it/s]/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth/Models/model.py:113: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/5]: 100%|██████████| 360/360 [01:01<00:00,  5.81it/s, accuracy=96.1, loss=0.286, running_loss=173]
+Epoch[2/5]: 100%|██████████| 360/360 [01:00<00:00,  5.98it/s, accuracy=96.8, loss=0.21, running_loss=70.5]
+Epoch[3/5]: 100%|██████████| 360/360 [01:00<00:00,  5.97it/s, accuracy=96.7, loss=0.0726, running_loss=52.9]
+Epoch[4/5]: 100%|██████████| 360/360 [00:59<00:00,  6.03it/s, accuracy=96.5, loss=0.072, running_loss=42.5]
+Epoch[5/5]: 100%|██████████| 360/360 [01:00<00:00,  5.95it/s, accuracy=96.8, loss=0.133, running_loss=35.7]
+==================================
+Final Accuracy Calculated on train set with feature map trained:
+96.28739316239316
+Final Accuracy Calculated on test set with feature map trained:
+96.78485576923077
+
+
+/Users/rohinichandrala/.conda/envs/featuresleuth/bin/python /Applications/PyCharm.app/Contents/plugins/python/helpers/pydev/pydevconsole.py --mode=client --port=61428
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+sys.path.extend(['/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth'])
+PyDev console: starting.
+Python 3.8.13 (default, Mar 28 2022, 06:16:26)
+[Clang 12.0.0 ] on darwin
+runfile('/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth/TrainOnFeatureMaps.py', wdir='/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth')
+Experiment on Fashion MNIST Dataset
+Batch-size: 256
+Learning-rate: 0.01
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw/train-images-idx3-ubyte.gz
+26422272it [00:07, 3711319.54it/s]
+Extracting ./data/mnist/train_data/FashionMNIST/raw/train-images-idx3-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw/train-labels-idx1-ubyte.gz
+29696it [00:00, 180907.71it/s]
+Extracting ./data/mnist/train_data/FashionMNIST/raw/train-labels-idx1-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw/t10k-images-idx3-ubyte.gz
+4422656it [00:01, 2966439.31it/s]
+Extracting ./data/mnist/train_data/FashionMNIST/raw/t10k-images-idx3-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz
+6144it [00:00, 11112463.90it/s]
+Extracting ./data/mnist/train_data/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz to ./data/mnist/train_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw/train-images-idx3-ubyte.gz
+26422272it [00:06, 4330441.06it/s]
+Extracting ./data/mnist/test_data/FashionMNIST/raw/train-images-idx3-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw/train-labels-idx1-ubyte.gz
+29696it [00:00, 97823.64it/s]
+Extracting ./data/mnist/test_data/FashionMNIST/raw/train-labels-idx1-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw/t10k-images-idx3-ubyte.gz
+4422656it [00:03, 1422361.62it/s]
+Extracting ./data/mnist/test_data/FashionMNIST/raw/t10k-images-idx3-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz
+6144it [00:00, 7914558.90it/s]
+Extracting ./data/mnist/test_data/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz to ./data/mnist/test_data/FashionMNIST/raw
+  0%|          | 0/235 [00:00<?, ?it/s]/Users/rohinichandrala/Documents/Personal_Docs/Dalhousie/ML/Project_new/featuresleuth/Models/model.py:262: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  out = self.softmax(out)
+Epoch[1/5]: 100%|██████████| 235/235 [01:47<00:00,  2.19it/s, accuracy=56, loss=1.32, running_loss=487]
+Epoch[2/5]: 100%|██████████| 235/235 [01:50<00:00,  2.13it/s, accuracy=66.8, loss=0.796, running_loss=235]
+Epoch[3/5]: 100%|██████████| 235/235 [01:51<00:00,  2.11it/s, accuracy=70.4, loss=0.714, running_loss=186]
+Epoch[4/5]: 100%|██████████| 235/235 [01:50<00:00,  2.13it/s, accuracy=73.8, loss=0.654, running_loss=171]
+Epoch[5/5]: 100%|██████████| 235/235 [01:49<00:00,  2.15it/s, accuracy=71.7, loss=0.559, running_loss=161]
+Accuracy on train set: 72.89333333333333
+Accuracy on test set: 71.69
+Epoch[1/2]: 100%|██████████| 768/768 [05:40<00:00,  2.26it/s, accuracy=72.3, loss=1.25, running_loss=1.17e+3]
+Epoch[2/2]: 100%|██████████| 768/768 [05:35<00:00,  2.29it/s, accuracy=71.8, loss=0.902, running_loss=758]
+==================================
+Final Accuracy Calculated on train set with feature map trained:
+72.18833333333333
+Final Accuracy Calculated on test set with feature map trained:
+72.78
+/Users/rohinichandrala/.conda/envs/featuresleuth/lib/python3.8/multiprocessing/resource_tracker.py:216: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+Process finished with exit code 0
+
+

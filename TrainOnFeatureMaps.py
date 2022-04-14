@@ -6,7 +6,7 @@ from DataLoader import Loader
 from DataLoader.Loader import FashionMNISTLoader
 from FeatureExtracter.FeatureMapsExtract import FmapExtract
 from ModelEvaluation.Evaluation import Evaluation
-from Models.model import BaseModel, BaseModelFeatureMap, FashionMnistModel
+from Models.model import BaseModel, BaseModelFeatureMap, FashionMnistBaseModel
 from Optimization.TrainingLoop import TrainLoop
 
 cs = ConfigStore.instance()
@@ -87,12 +87,12 @@ def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
     fashion_mnist_loader = FashionMNISTLoader()
     train_loader, test_loader = fashion_mnist_loader.load_test_and_trainset(cfg.hyperparams.batch_size)
     # load the existing model
-    fashion_mnist_model = FashionMnistModel(padding=1)
+    fashion_mnist_model = FashionMnistBaseModel(padding=1)
     TrainLoop.Tloop(fashion_mnist_model, cfg.hyperparams.epochs, cfg.hyperparams.optimizer,
                     cfg.hyperparams.learning_rate,
                     train_loader, test_loader)
 
-    fashion_mnist_feature_model = FashionMnistModel(padding=2)
+    fashion_mnist_feature_model = FashionMnistBaseModel(padding=2)
     fashion_mnist_feature_model.load_state_dict(fashion_mnist_model.state_dict())
     feature_extraction_layers = ['layer1.0']
     # extracting feature maps
@@ -108,7 +108,7 @@ def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
 
     del fashion_mnist_model
 
-    model_for_testing_fashion_mnist = FashionMnistModel(padding=1)
+    model_for_testing_fashion_mnist = FashionMnistBaseModel(padding=1)
     model_for_testing_fashion_mnist.load_state_dict(fashion_mnist_feature_model.state_dict())
     print("==================================")
     print("Final Accuracy Calculated on train set with feature map trained:")
@@ -120,5 +120,5 @@ def test_fashion_mnist_dataset(cfg: MNISTConfig) -> None:
 
 
 if __name__ == "__main__":
-    test_mnist_dataset()
-    # test_fashion_mnist_dataset()
+    # test_mnist_dataset()
+    test_fashion_mnist_dataset()
