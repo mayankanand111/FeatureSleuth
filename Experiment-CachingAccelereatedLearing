@@ -1,0 +1,676 @@
+========================================================================================================================
+                                        Experiment-Cache Check Training
+========================================================================================================================
+This readme file explains about experiment Cache Check Training.
+========================================================================================================================
+1. What did you try?
+
+Our objective in this experiment was to find similar images in a dataset using feature maps. So what we did is as we are
+training images in batches, after every batch we are extracting feature maps from the first layer of cnn and storing
+these extracted feature maps in cache. So when the next batch comes we first extract feature maps for that batch using the
+weights that we have got on training our model so far. And these feature maps are compared against the ones that are stored
+in cache using using cosine similarity check.
+
+On finding most similar feature map against the cache if the label for both feature maps is same, we removed that image
+from the batch and train our model on images that did not find any match in cache.
+
+This check is done on each batch input.
+========================================================================================================================
+2. Why did you try it?
+
+The reason we tried this experiment is to accelerate the training by not training our model on same set of images which
+might increase training time. And we thought like is training model  on different images might act as a regularizer too.
+========================================================================================================================
+3. What did you expect by trying it?
+
+ We expected that when we train images before checking their similarity we might be able to train only on different type
+ of images which might led us to find optimum quicker as training on similar images will makes our optimizer to follow
+ zig-zag path. which might take time to find the optimum.Especially when the batch size is large.
+========================================================================================================================
+4. Did it happen the way you expected?
+
+Yes, but not the exactly same that we expected. 
+
+Expectation : We expected that in each epoch accuracy of the model trained using cached technique will outperfom the normal
+technique without cashing.
+
+Reality : In results it showed that for first two epochs cached technique outperformed vanilla technique but in later epochs it didnot.
+
+
+Reason: Because as when we are caching data we are restricting dataset to smaller set so its did get little biased towrds those examples. So in future experiments what we will try is for first few epochs we will use cache technique and for later will use vanilla technique so to accelerate learning.
+
+Finding: Larger batche sizes can be used using cached technique to accelerate learning in first few epochs.
+
+========================================================================================================================
+5. What changes did you make to the models and/or to the data and/or to the training procedure and/or to the evaluation?
+    Why?
+We made changes in training loop while sending batches for training. For each batch we extracted featuremaps of batch images and compared it with already cached feature maps and if the feature maps matches using cosine similarity we didnot pas that image for training as already model is trained on similar kind of image.
+
+
+========================================================================================================================
+                                                    RESULTS - April 10-13
+========================================================================================================================
+
+=================================================================================================
+=============================================Batch 4096============================================
+runfile('C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April/Train.py', wdir='C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April')
+  0%|          | 0/15 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Project12April\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 15/15 [00:18<00:00,  1.26s/it, accuracy=11, loss=2.3, running_loss=215]
+Epoch[2/10]: 100%|██████████| 15/15 [00:18<00:00,  1.24s/it, accuracy=12.7, loss=2.27, running_loss=34.3]
+Epoch[3/10]: 100%|██████████| 15/15 [00:18<00:00,  1.24s/it, accuracy=18.6, loss=2.22, running_loss=33.7]
+Epoch[4/10]: 100%|██████████| 15/15 [00:19<00:00,  1.29s/it, accuracy=34.3, loss=2.07, running_loss=32.3]
+Epoch[5/10]: 100%|██████████| 15/15 [00:18<00:00,  1.25s/it, accuracy=67.1, loss=1.25, running_loss=26]
+Epoch[6/10]: 100%|██████████| 15/15 [00:18<00:00,  1.24s/it, accuracy=82.5, loss=0.775, running_loss=16.3]
+Epoch[7/10]: 100%|██████████| 15/15 [00:19<00:00,  1.30s/it, accuracy=85.2, loss=0.611, running_loss=8.82]
+Epoch[8/10]: 100%|██████████| 15/15 [00:18<00:00,  1.25s/it, accuracy=85.6, loss=0.466, running_loss=6.43]
+Epoch[9/10]: 100%|██████████| 15/15 [00:19<00:00,  1.27s/it, accuracy=91.2, loss=0.336, running_loss=5.6]
+Epoch[10/10]: 100%|██████████| 15/15 [00:18<00:00,  1.26s/it, accuracy=91.8, loss=0.317, running_loss=4.49]
+Accuracy on train set: 91.24166666666666
+Accuracy on test set: 91.78
+Epoch[1/10]: 100%|██████████| 15/15 [00:27<00:00,  1.81s/it, accuracy=25.3, cache_hits=55904, loss=2.12, running_loss=92.3, successful_cache_hits=18133, total_images_trained=41867]
+Epoch[2/10]: 100%|██████████| 15/15 [00:26<00:00,  1.75s/it, accuracy=62.1, cache_hits=55904, loss=1.07, running_loss=24.8, successful_cache_hits=19376, total_images_trained=40624]
+Epoch[3/10]: 100%|██████████| 15/15 [00:26<00:00,  1.78s/it, accuracy=72.6, cache_hits=55904, loss=0.563, running_loss=12, successful_cache_hits=19675, total_images_trained=40325]
+Epoch[4/10]: 100%|██████████| 15/15 [00:26<00:00,  1.75s/it, accuracy=85.9, cache_hits=55904, loss=0.336, running_loss=6.9, successful_cache_hits=20413, total_images_trained=39587]
+Epoch[5/10]: 100%|██████████| 15/15 [00:26<00:00,  1.79s/it, accuracy=90, cache_hits=55904, loss=0.317, running_loss=4.92, successful_cache_hits=20711, total_images_trained=39289]
+Epoch[6/10]: 100%|██████████| 15/15 [00:26<00:00,  1.74s/it, accuracy=91.6, cache_hits=55904, loss=0.256, running_loss=4.23, successful_cache_hits=20851, total_images_trained=39149]
+Epoch[7/10]: 100%|██████████| 15/15 [00:26<00:00,  1.75s/it, accuracy=92.9, cache_hits=55904, loss=0.254, running_loss=3.74, successful_cache_hits=20947, total_images_trained=39053]
+Epoch[8/10]: 100%|██████████| 15/15 [00:26<00:00,  1.79s/it, accuracy=93.7, cache_hits=55904, loss=0.211, running_loss=3.41, successful_cache_hits=21197, total_images_trained=38803]
+Epoch[9/10]: 100%|██████████| 15/15 [00:26<00:00,  1.75s/it, accuracy=94.2, cache_hits=55904, loss=0.213, running_loss=3.09, successful_cache_hits=21247, total_images_trained=38753]
+Epoch[10/10]: 100%|██████████| 15/15 [00:26<00:00,  1.79s/it, accuracy=94.2, cache_hits=55904, loss=0.198, running_loss=2.88, successful_cache_hits=21181, total_images_trained=38819]
+Accuracy on train set: 94.17333333333333
+Accuracy on test set: 94.16
+
+
+====================================================================================
+======================================Batch 2048====================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Machine Learning/project_8_4/featuresleuth/Train.py"
+  0%|          | 0/30 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Machine Learning\project_8_4\featuresleuth\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 30/30 [00:22<00:00,  1.31it/s, accuracy=30.7, loss=2.2, running_loss=444]
+Epoch[2/10]: 100%|██████████| 30/30 [00:22<00:00,  1.33it/s, accuracy=54.4, loss=1.36, running_loss=55.7]
+Epoch[3/10]: 100%|██████████| 30/30 [00:23<00:00,  1.30it/s, accuracy=71.7, loss=0.978, running_loss=32.1]
+Epoch[4/10]: 100%|██████████| 30/30 [00:22<00:00,  1.33it/s, accuracy=77.4, loss=0.85, running_loss=22.7]
+Epoch[5/10]: 100%|██████████| 30/30 [00:22<00:00,  1.34it/s, accuracy=85.4, loss=0.458, running_loss=18.3]
+Epoch[6/10]: 100%|██████████| 30/30 [00:22<00:00,  1.33it/s, accuracy=87.2, loss=0.388, running_loss=14.1]
+Epoch[7/10]: 100%|██████████| 30/30 [00:22<00:00,  1.33it/s, accuracy=90.4, loss=0.34, running_loss=11.2]
+Epoch[8/10]: 100%|██████████| 30/30 [00:22<00:00,  1.33it/s, accuracy=90.2, loss=0.286, running_loss=8.97]
+Epoch[9/10]: 100%|██████████| 30/30 [00:22<00:00,  1.35it/s, accuracy=92.7, loss=0.261, running_loss=8.06]
+Epoch[10/10]: 100%|██████████| 30/30 [00:22<00:00,  1.33it/s, accuracy=93.1, loss=0.194, running_loss=7.16]
+Accuracy on train set: 93.17166666666667
+Accuracy on test set: 93.10000000000001
+Epoch[1/10]: 100%|██████████| 30/30 [00:36<00:00,  1.21s/it, accuracy=14.8, cache_hits=57952, loss=2.12, running_loss=192, successful_cache_hits=18051, total_images_trained=41949]
+Epoch[2/10]: 100%|██████████| 30/30 [00:35<00:00,  1.17s/it, accuracy=58, cache_hits=57952, loss=1.21, running_loss=49.1, successful_cache_hits=18284, total_images_trained=41716]
+Epoch[3/10]: 100%|██████████| 30/30 [00:34<00:00,  1.15s/it, accuracy=73.8, cache_hits=57952, loss=0.543, running_loss=20.6, successful_cache_hits=18505, total_images_trained=41495]
+Epoch[4/10]: 100%|██████████| 30/30 [00:34<00:00,  1.15s/it, accuracy=79.6, cache_hits=57952, loss=0.364, running_loss=12.6, successful_cache_hits=18914, total_images_trained=41086]
+Epoch[5/10]: 100%|██████████| 30/30 [00:31<00:00,  1.06s/it, accuracy=84.1, cache_hits=57952, loss=0.291, running_loss=9.74, successful_cache_hits=19230, total_images_trained=40770]
+Epoch[6/10]: 100%|██████████| 30/30 [00:32<00:00,  1.08s/it, accuracy=88.1, cache_hits=57952, loss=0.286, running_loss=8.24, successful_cache_hits=19109, total_images_trained=40891]
+Epoch[7/10]: 100%|██████████| 30/30 [00:33<00:00,  1.11s/it, accuracy=92.1, cache_hits=57952, loss=0.216, running_loss=7.23, successful_cache_hits=19407, total_images_trained=40593]
+Epoch[8/10]: 100%|██████████| 30/30 [00:32<00:00,  1.07s/it, accuracy=92.7, cache_hits=57952, loss=0.183, running_loss=5.82, successful_cache_hits=19396, total_images_trained=40604]
+Epoch[9/10]: 100%|██████████| 30/30 [00:31<00:00,  1.06s/it, accuracy=95, cache_hits=57952, loss=0.139, running_loss=5.31, successful_cache_hits=19340, total_images_trained=40660]
+Epoch[10/10]: 100%|██████████| 30/30 [00:31<00:00,  1.06s/it, accuracy=94.6, cache_hits=57952, loss=0.174, running_loss=4.77, successful_cache_hits=19420, total_images_trained=40580]
+Accuracy on train set: 94.52333333333334
+Accuracy on test set: 94.58
+
+Process finished with exit code 0
+=========================================================================================
+======================================Batch 1024==========================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Machine Learning/project_8_4/featuresleuth/Train.py"
+  0%|          | 0/59 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Machine Learning\project_8_4\featuresleuth\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 59/59 [00:30<00:00,  1.94it/s, accuracy=81.5, loss=0.809, running_loss=189]
+Epoch[2/10]: 100%|██████████| 59/59 [00:30<00:00,  1.96it/s, accuracy=92.2, loss=0.316, running_loss=25.9]
+Epoch[3/10]: 100%|██████████| 59/59 [00:32<00:00,  1.83it/s, accuracy=94.5, loss=0.228, running_loss=14.7]
+Epoch[4/10]: 100%|██████████| 59/59 [00:31<00:00,  1.87it/s, accuracy=94.8, loss=0.169, running_loss=10.9]
+Epoch[5/10]: 100%|██████████| 59/59 [00:30<00:00,  1.94it/s, accuracy=95.9, loss=0.0965, running_loss=8.88]
+Epoch[6/10]: 100%|██████████| 59/59 [00:31<00:00,  1.86it/s, accuracy=96.4, loss=0.109, running_loss=7.77]
+Epoch[7/10]: 100%|██████████| 59/59 [00:31<00:00,  1.89it/s, accuracy=96.6, loss=0.108, running_loss=6.89]
+Epoch[8/10]: 100%|██████████| 59/59 [00:30<00:00,  1.95it/s, accuracy=96.8, loss=0.0932, running_loss=6.24]
+Epoch[9/10]: 100%|██████████| 59/59 [00:30<00:00,  1.92it/s, accuracy=97, loss=0.0884, running_loss=5.73]
+Epoch[10/10]: 100%|██████████| 59/59 [00:30<00:00,  1.97it/s, accuracy=97.3, loss=0.0772, running_loss=5.37]
+Accuracy on train set: 97.41666666666666
+Accuracy on test set: 97.33000000000001
+Epoch[1/10]: 100%|██████████| 59/59 [00:40<00:00,  1.46it/s, accuracy=42.9, cache_hits=58976, loss=1.41, running_loss=239, successful_cache_hits=18435, total_images_trained=41565]
+Epoch[2/10]: 100%|██████████| 59/59 [00:41<00:00,  1.44it/s, accuracy=77.4, cache_hits=58976, loss=0.489, running_loss=42, successful_cache_hits=18730, total_images_trained=41270]
+Epoch[3/10]: 100%|██████████| 59/59 [00:39<00:00,  1.50it/s, accuracy=82.4, cache_hits=58976, loss=0.232, running_loss=20.2, successful_cache_hits=19180, total_images_trained=40820]
+Epoch[4/10]: 100%|██████████| 59/59 [00:39<00:00,  1.48it/s, accuracy=83.6, cache_hits=58976, loss=0.275, running_loss=14.5, successful_cache_hits=19305, total_images_trained=40695]
+Epoch[5/10]: 100%|██████████| 59/59 [00:40<00:00,  1.46it/s, accuracy=86.5, cache_hits=58976, loss=0.143, running_loss=12, successful_cache_hits=19594, total_images_trained=40406]
+Epoch[6/10]: 100%|██████████| 59/59 [00:39<00:00,  1.49it/s, accuracy=90.7, cache_hits=58976, loss=0.139, running_loss=10.2, successful_cache_hits=19781, total_images_trained=40219]
+Epoch[7/10]: 100%|██████████| 59/59 [00:44<00:00,  1.34it/s, accuracy=91.6, cache_hits=58976, loss=0.157, running_loss=8.37, successful_cache_hits=19623, total_images_trained=40377]
+Epoch[8/10]: 100%|██████████| 59/59 [00:44<00:00,  1.32it/s, accuracy=92.9, cache_hits=58976, loss=0.0713, running_loss=7.55, successful_cache_hits=19678, total_images_trained=40322]
+Epoch[9/10]: 100%|██████████| 59/59 [00:42<00:00,  1.38it/s, accuracy=93.3, cache_hits=58976, loss=0.0735, running_loss=6.91, successful_cache_hits=19799, total_images_trained=40201]
+Epoch[10/10]: 100%|██████████| 59/59 [00:40<00:00,  1.46it/s, accuracy=94, cache_hits=58976, loss=0.121, running_loss=6.3, successful_cache_hits=19858, total_images_trained=40142]
+Accuracy on train set: 94.575
+Accuracy on test set: 94.04
+
+Process finished with exit code 0
+============================================================================================
+================================Batch 512=======================================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Machine Learning/project_8_4/featuresleuth/Train.py"
+  0%|          | 0/118 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Machine Learning\project_8_4\featuresleuth\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 118/118 [00:44<00:00,  2.64it/s, accuracy=89.5, loss=0.383, running_loss=233]
+Epoch[2/10]: 100%|██████████| 118/118 [00:44<00:00,  2.64it/s, accuracy=95.1, loss=0.106, running_loss=26.2]
+Epoch[3/10]: 100%|██████████| 118/118 [00:46<00:00,  2.56it/s, accuracy=95.2, loss=0.192, running_loss=18.4]
+Epoch[4/10]: 100%|██████████| 118/118 [00:43<00:00,  2.69it/s, accuracy=96.4, loss=0.0503, running_loss=14.6]
+Epoch[5/10]: 100%|██████████| 118/118 [00:43<00:00,  2.70it/s, accuracy=96.9, loss=0.0577, running_loss=12.5]
+Epoch[6/10]: 100%|██████████| 118/118 [00:46<00:00,  2.56it/s, accuracy=97.1, loss=0.0285, running_loss=11]
+Epoch[7/10]: 100%|██████████| 118/118 [00:48<00:00,  2.45it/s, accuracy=97.2, loss=0.0921, running_loss=10]
+Epoch[8/10]: 100%|██████████| 118/118 [00:48<00:00,  2.45it/s, accuracy=97.4, loss=0.0888, running_loss=9.19]
+Epoch[9/10]: 100%|██████████| 118/118 [00:48<00:00,  2.45it/s, accuracy=97, loss=0.0682, running_loss=8.47]
+Epoch[10/10]: 100%|██████████| 118/118 [00:49<00:00,  2.37it/s, accuracy=94.8, loss=0.193, running_loss=7.86]
+Accuracy on train set: 95.46666666666667
+Accuracy on test set: 94.85
+Epoch[1/10]: 100%|██████████| 118/118 [01:00<00:00,  1.95it/s, accuracy=56.1, cache_hits=59488, loss=0.85, running_loss=542, successful_cache_hits=19152, total_images_trained=40848]
+Epoch[2/10]: 100%|██████████| 118/118 [00:59<00:00,  1.97it/s, accuracy=66.8, cache_hits=59488, loss=0.482, running_loss=68.1, successful_cache_hits=2e+4, total_images_trained=4e+4]
+Epoch[3/10]: 100%|██████████| 118/118 [01:07<00:00,  1.76it/s, accuracy=71.3, cache_hits=59488, loss=0.436, running_loss=46.9, successful_cache_hits=19791, total_images_trained=40209]
+Epoch[4/10]: 100%|██████████| 118/118 [01:06<00:00,  1.77it/s, accuracy=78.5, cache_hits=59488, loss=0.265, running_loss=36.1, successful_cache_hits=19592, total_images_trained=40408]
+Epoch[5/10]: 100%|██████████| 118/118 [01:06<00:00,  1.78it/s, accuracy=82.2, cache_hits=59488, loss=0.142, running_loss=30.4, successful_cache_hits=19725, total_images_trained=40275]
+Epoch[6/10]: 100%|██████████| 118/118 [00:56<00:00,  2.07it/s, accuracy=84.9, cache_hits=59488, loss=0.172, running_loss=27, successful_cache_hits=19579, total_images_trained=40421]
+Epoch[7/10]: 100%|██████████| 118/118 [00:54<00:00,  2.17it/s, accuracy=84, cache_hits=59488, loss=0.1, running_loss=24.2, successful_cache_hits=19694, total_images_trained=40306]
+Epoch[8/10]: 100%|██████████| 118/118 [00:53<00:00,  2.19it/s, accuracy=85.8, cache_hits=59488, loss=0.235, running_loss=22.9, successful_cache_hits=19757, total_images_trained=40243]
+Epoch[9/10]: 100%|██████████| 118/118 [00:53<00:00,  2.19it/s, accuracy=90.5, cache_hits=59488, loss=0.155, running_loss=20.9, successful_cache_hits=19544, total_images_trained=40456]
+Epoch[10/10]: 100%|██████████| 118/118 [00:56<00:00,  2.09it/s, accuracy=90.4, cache_hits=59488, loss=0.0376, running_loss=19.5, successful_cache_hits=19610, total_images_trained=40390]
+Accuracy on train set: 90.55499999999999
+Accuracy on test set: 90.42
+
+Process finished with exit code 0
+=======================================================================================================
+=========================================Batch 256=====================================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Machine Learning/project_8_4/featuresleuth/Train.py"
+  0%|          | 0/235 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Machine Learning\project_8_4\featuresleuth\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 235/235 [01:09<00:00,  3.38it/s, accuracy=93.3, loss=0.228, running_loss=645]
+Epoch[2/10]: 100%|██████████| 235/235 [01:09<00:00,  3.39it/s, accuracy=93.5, loss=0.155, running_loss=43.5]
+Epoch[3/10]: 100%|██████████| 235/235 [01:10<00:00,  3.35it/s, accuracy=95.9, loss=0.157, running_loss=31.5]
+Epoch[4/10]: 100%|██████████| 235/235 [01:13<00:00,  3.20it/s, accuracy=97.1, loss=0.0362, running_loss=25.2]
+Epoch[5/10]: 100%|██████████| 235/235 [01:16<00:00,  3.06it/s, accuracy=96.6, loss=0.0721, running_loss=21.5]
+Epoch[6/10]: 100%|██████████| 235/235 [01:16<00:00,  3.07it/s, accuracy=97.7, loss=0.0141, running_loss=18.5]
+Epoch[7/10]: 100%|██████████| 235/235 [01:17<00:00,  3.05it/s, accuracy=97.6, loss=0.069, running_loss=16.7]
+Epoch[8/10]: 100%|██████████| 235/235 [01:17<00:00,  3.04it/s, accuracy=97.6, loss=0.0441, running_loss=15.1]
+Epoch[9/10]: 100%|██████████| 235/235 [01:13<00:00,  3.19it/s, accuracy=97.6, loss=0.0268, running_loss=13.8]
+Epoch[10/10]: 100%|██████████| 235/235 [01:09<00:00,  3.36it/s, accuracy=97.9, loss=0.0212, running_loss=12.5]
+Accuracy on train set: 98.44833333333334
+Accuracy on test set: 97.92
+Epoch[1/10]: 100%|██████████| 235/235 [01:24<00:00,  2.77it/s, accuracy=81.7, cache_hits=59744, loss=0.253, running_loss=229, successful_cache_hits=20374, total_images_trained=39626]
+Epoch[2/10]: 100%|██████████| 235/235 [01:30<00:00,  2.60it/s, accuracy=84.8, cache_hits=59744, loss=0.123, running_loss=40, successful_cache_hits=20603, total_images_trained=39397]
+Epoch[3/10]: 100%|██████████| 235/235 [01:34<00:00,  2.49it/s, accuracy=83.5, cache_hits=59744, loss=0.291, running_loss=29.1, successful_cache_hits=20701, total_images_trained=39299]
+Epoch[4/10]: 100%|██████████| 235/235 [01:28<00:00,  2.66it/s, accuracy=87.4, cache_hits=59744, loss=0.0557, running_loss=23.3, successful_cache_hits=20902, total_images_trained=39098]
+Epoch[5/10]: 100%|██████████| 235/235 [01:39<00:00,  2.37it/s, accuracy=89.3, cache_hits=59744, loss=0.086, running_loss=19.5, successful_cache_hits=20806, total_images_trained=39194]
+Epoch[6/10]: 100%|██████████| 235/235 [01:23<00:00,  2.80it/s, accuracy=94, cache_hits=59744, loss=0.0702, running_loss=16.9, successful_cache_hits=21059, total_images_trained=38941]
+Epoch[7/10]: 100%|██████████| 235/235 [01:24<00:00,  2.78it/s, accuracy=88.5, cache_hits=59744, loss=0.0858, running_loss=14.7, successful_cache_hits=21160, total_images_trained=38840]
+Epoch[8/10]: 100%|██████████| 235/235 [01:30<00:00,  2.59it/s, accuracy=93.5, cache_hits=59744, loss=0.0762, running_loss=13.3, successful_cache_hits=21064, total_images_trained=38936]
+Epoch[9/10]: 100%|██████████| 235/235 [01:32<00:00,  2.53it/s, accuracy=93.9, cache_hits=59744, loss=0.0198, running_loss=12, successful_cache_hits=21133, total_images_trained=38867]
+Epoch[10/10]: 100%|██████████| 235/235 [01:32<00:00,  2.55it/s, accuracy=95.3, cache_hits=59744, loss=0.0317, running_loss=10.7, successful_cache_hits=21206, total_images_trained=38794]
+Accuracy on train set: 96.01666666666667
+Accuracy on test set: 95.30999999999999
+
+Process finished with exit code 0
+===========================================================================================================
+===========================================Batch 128=============================================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Machine Learning/project_8_4/featuresleuth/Train.py"
+  0%|          | 0/469 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Machine Learning\project_8_4\featuresleuth\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 469/469 [02:50<00:00,  2.75it/s, accuracy=96, loss=0.078, running_loss=673]
+Epoch[2/10]: 100%|██████████| 469/469 [02:49<00:00,  2.77it/s, accuracy=96.7, loss=0.0554, running_loss=54.4]
+Epoch[3/10]: 100%|██████████| 469/469 [02:47<00:00,  2.80it/s, accuracy=97.2, loss=0.0728, running_loss=63.2]
+Epoch[4/10]: 100%|██████████| 469/469 [02:51<00:00,  2.74it/s, accuracy=97.5, loss=0.155, running_loss=35.4]
+Epoch[5/10]: 100%|██████████| 469/469 [02:47<00:00,  2.80it/s, accuracy=97.9, loss=0.013, running_loss=29.1]
+Epoch[6/10]: 100%|██████████| 469/469 [02:49<00:00,  2.77it/s, accuracy=97.8, loss=0.055, running_loss=24.3]
+Epoch[7/10]: 100%|██████████| 469/469 [02:47<00:00,  2.80it/s, accuracy=98.1, loss=0.0166, running_loss=21.3]
+Epoch[8/10]: 100%|██████████| 469/469 [02:47<00:00,  2.81it/s, accuracy=98.2, loss=0.0189, running_loss=19.2]
+Epoch[9/10]: 100%|██████████| 469/469 [02:51<00:00,  2.74it/s, accuracy=98, loss=0.0179, running_loss=17.3]
+Epoch[10/10]: 100%|██████████| 469/469 [02:49<00:00,  2.77it/s, accuracy=98.1, loss=0.0119, running_loss=15.8]
+Accuracy on train set: 99.20333333333333
+Accuracy on test set: 98.07000000000001
+Epoch[1/10]: 100%|██████████| 469/469 [03:20<00:00,  2.34it/s, accuracy=85.8, cache_hits=59872, loss=0.135, running_loss=604, successful_cache_hits=18438, total_images_trained=41562]
+Epoch[2/10]: 100%|██████████| 469/469 [03:21<00:00,  2.33it/s, accuracy=86.1, cache_hits=59872, loss=0.149, running_loss=65.2, successful_cache_hits=17542, total_images_trained=42458]
+Epoch[3/10]: 100%|██████████| 469/469 [03:21<00:00,  2.32it/s, accuracy=90, cache_hits=59872, loss=0.012, running_loss=47.2, successful_cache_hits=17713, total_images_trained=42287]
+Epoch[4/10]: 100%|██████████| 469/469 [03:20<00:00,  2.34it/s, accuracy=93.1, cache_hits=59872, loss=0.121, running_loss=37, successful_cache_hits=17765, total_images_trained=42235]
+Epoch[5/10]: 100%|██████████| 469/469 [03:22<00:00,  2.32it/s, accuracy=90.6, cache_hits=59872, loss=0.00719, running_loss=32.3, successful_cache_hits=17681, total_images_trained=42319]
+Epoch[6/10]: 100%|██████████| 469/469 [03:34<00:00,  2.19it/s, accuracy=92.5, cache_hits=59872, loss=0.248, running_loss=29.1, successful_cache_hits=17861, total_images_trained=42139]
+Epoch[7/10]: 100%|██████████| 469/469 [03:30<00:00,  2.23it/s, accuracy=94.7, cache_hits=59872, loss=0.121, running_loss=24.7, successful_cache_hits=17993, total_images_trained=42007]
+Epoch[8/10]: 100%|██████████| 469/469 [03:27<00:00,  2.26it/s, accuracy=94.6, cache_hits=59872, loss=0.0677, running_loss=21.7, successful_cache_hits=17602, total_images_trained=42398]
+Epoch[9/10]: 100%|██████████| 469/469 [03:35<00:00,  2.18it/s, accuracy=97.2, cache_hits=59872, loss=0.0373, running_loss=20.2, successful_cache_hits=17989, total_images_trained=42011]
+Epoch[10/10]: 100%|██████████| 469/469 [03:46<00:00,  2.07it/s, accuracy=96.5, cache_hits=59872, loss=0.024, running_loss=18.1, successful_cache_hits=17768, total_images_trained=42232]
+Accuracy on train set: 97.59666666666666
+Accuracy on test set: 96.49
+
+Process finished with exit code 0
+
+====================================================================================================================
+===================================================Batch 64==============================================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:\Program Files\JetBrains\PyCharm 2021.3.2\plugins\python\helpers\pydev\pydevconsole.py" --mode=client --port=50799
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+sys.path.extend(['C:\\Users\\Mayank\\OneDrive - Dalhousie University\\Winter 2022\\Project12April', 'C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April'])
+Python 3.8.6 (tags/v3.8.6:db45529, Sep 23 2020, 15:52:53) [MSC v.1927 64 bit (AMD64)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.28.0 -- An enhanced Interactive Python. Type '?' for help.
+PyDev console: using IPython 7.28.0
+Python 3.8.6 (tags/v3.8.6:db45529, Sep 23 2020, 15:52:53) [MSC v.1927 64 bit (AMD64)] on win32
+runfile('C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April/Train.py', wdir='C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April')
+  0%|          | 0/938 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Project12April\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 938/938 [03:50<00:00,  4.08it/s, accuracy=94, loss=0.147, running_loss=1.61e+3]
+Epoch[2/10]: 100%|██████████| 938/938 [03:44<00:00,  4.17it/s, accuracy=96, loss=0.166, running_loss=139]
+Epoch[3/10]: 100%|██████████| 938/938 [04:42<00:00,  3.32it/s, accuracy=97.2, loss=0.185, running_loss=91.2]
+Epoch[4/10]: 100%|██████████| 938/938 [04:18<00:00,  3.62it/s, accuracy=97.7, loss=0.015, running_loss=159]
+Epoch[5/10]: 100%|██████████| 938/938 [04:12<00:00,  3.71it/s, accuracy=96.1, loss=0.236, running_loss=72]
+Epoch[6/10]: 100%|██████████| 938/938 [03:57<00:00,  3.96it/s, accuracy=97.8, loss=0.0484, running_loss=62.1]
+Epoch[7/10]: 100%|██████████| 938/938 [03:41<00:00,  4.24it/s, accuracy=98.1, loss=0.0582, running_loss=55.5]
+Epoch[8/10]: 100%|██████████| 938/938 [03:40<00:00,  4.25it/s, accuracy=96.8, loss=0.0614, running_loss=52.3]
+Epoch[9/10]: 100%|██████████| 938/938 [03:41<00:00,  4.24it/s, accuracy=98, loss=0.0455, running_loss=48.7]
+Epoch[10/10]: 100%|██████████| 938/938 [03:40<00:00,  4.25it/s, accuracy=97.6, loss=0.0658, running_loss=45.3]
+Accuracy on train set: 98.20166666666667
+Accuracy on test set: 97.63
+Epoch[1/10]: 100%|██████████| 938/938 [04:24<00:00,  3.55it/s, accuracy=78.8, cache_hits=59936, loss=0.0706, running_loss=1.1e+3, successful_cache_hits=18956, total_images_trained=41044]
+Epoch[2/10]: 100%|██████████| 938/938 [04:22<00:00,  3.57it/s, accuracy=85.1, cache_hits=59936, loss=0.051, running_loss=208, successful_cache_hits=18616, total_images_trained=41384]
+Epoch[3/10]: 100%|██████████| 938/938 [04:18<00:00,  3.63it/s, accuracy=88.4, cache_hits=59936, loss=0.204, running_loss=122, successful_cache_hits=18207, total_images_trained=41793]
+Epoch[4/10]: 100%|██████████| 938/938 [04:28<00:00,  3.50it/s, accuracy=88.7, cache_hits=59936, loss=0.191, running_loss=97, successful_cache_hits=18982, total_images_trained=41018]
+Epoch[5/10]: 100%|██████████| 938/938 [04:40<00:00,  3.35it/s, accuracy=93.2, cache_hits=59936, loss=0.00808, running_loss=80, successful_cache_hits=18916, total_images_trained=41084]
+Epoch[6/10]: 100%|██████████| 938/938 [04:21<00:00,  3.58it/s, accuracy=95.4, cache_hits=59936, loss=0.0172, running_loss=70.7, successful_cache_hits=18754, total_images_trained=41246]
+Epoch[7/10]: 100%|██████████| 938/938 [04:19<00:00,  3.62it/s, accuracy=93, cache_hits=59936, loss=0.0533, running_loss=62, successful_cache_hits=18913, total_images_trained=41087]
+Epoch[8/10]: 100%|██████████| 938/938 [04:22<00:00,  3.58it/s, accuracy=95.7, cache_hits=59936, loss=0.0759, running_loss=54.6, successful_cache_hits=18496, total_images_trained=41504]
+Epoch[9/10]: 100%|██████████| 938/938 [04:30<00:00,  3.47it/s, accuracy=95.5, cache_hits=59936, loss=0.0198, running_loss=50.8, successful_cache_hits=18882, total_images_trained=41118]
+Epoch[10/10]: 100%|██████████| 938/938 [1:12:34<00:00,  4.64s/it, accuracy=93.7, cache_hits=59936, loss=0.0328, running_loss=43.1, successful_cache_hits=18269, total_images_trained=41731]
+Accuracy on train set: 94.71166666666667
+Accuracy on test set: 93.71000000000001
+==========================================================================================================
+=================================Batch 32=================================================================
+C:\Users\Mayank\AppData\Local\Programs\Python\Python38\python.exe "C:\Program Files\JetBrains\PyCharm 2021.3.2\plugins\python\helpers\pydev\pydevconsole.py" --mode=client --port=64798
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+sys.path.extend(['C:\\Users\\Mayank\\OneDrive - Dalhousie University\\Winter 2022\\Project12April', 'C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April'])
+Python 3.8.6 (tags/v3.8.6:db45529, Sep 23 2020, 15:52:53) [MSC v.1927 64 bit (AMD64)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.28.0 -- An enhanced Interactive Python. Type '?' for help.
+PyDev console: using IPython 7.28.0
+Python 3.8.6 (tags/v3.8.6:db45529, Sep 23 2020, 15:52:53) [MSC v.1927 64 bit (AMD64)] on win32
+runfile('C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April/Train.py', wdir='C:/Users/Mayank/OneDrive - Dalhousie University/Winter 2022/Project12April')
+  0%|          | 0/1875 [00:00<?, ?it/s]C:\Users\Mayank\OneDrive - Dalhousie University\Winter 2022\Project12April\Models\model.py:23: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  finput = self.softmax(finput)
+Epoch[1/10]: 100%|██████████| 1875/1875 [08:53<00:00,  3.51it/s, accuracy=97.6, loss=0.00465, running_loss=605]
+Epoch[2/10]: 100%|██████████| 1875/1875 [09:24<00:00,  3.32it/s, accuracy=98.3, loss=0.0216, running_loss=133]
+Epoch[3/10]: 100%|██████████| 1875/1875 [10:04<00:00,  3.10it/s, accuracy=98.5, loss=0.116, running_loss=96]
+Epoch[4/10]: 100%|██████████| 1875/1875 [10:43<00:00,  2.91it/s, accuracy=98.6, loss=0.00271, running_loss=75.9]
+Epoch[5/10]: 100%|██████████| 1875/1875 [09:44<00:00,  3.21it/s, accuracy=98.6, loss=0.00677, running_loss=60.3]
+Epoch[6/10]: 100%|██████████| 1875/1875 [10:04<00:00,  3.10it/s, accuracy=98.7, loss=0.00233, running_loss=48.3]
+Epoch[7/10]: 100%|██████████| 1875/1875 [08:24<00:00,  3.71it/s, accuracy=98.7, loss=0.00582, running_loss=44.7]
+Epoch[8/10]: 100%|██████████| 1875/1875 [07:53<00:00,  3.96it/s, accuracy=98.7, loss=0.000205, running_loss=34.4]
+Epoch[9/10]: 100%|██████████| 1875/1875 [07:55<00:00,  3.94it/s, accuracy=98.7, loss=0.0839, running_loss=32.3]
+Epoch[10/10]: 100%|██████████| 1875/1875 [07:58<00:00,  3.92it/s, accuracy=98.5, loss=0.0293, running_loss=28.6]
+Accuracy on train set: 99.32
+Accuracy on test set: 98.52
+Epoch[1/10]: 100%|██████████| 1875/1875 [09:08<00:00,  3.42it/s, accuracy=97.9, cache_hits=6e+4, loss=0.019, running_loss=588, successful_cache_hits=0, total_images_trained=6e+4]
+Epoch[2/10]: 100%|██████████| 1875/1875 [09:02<00:00,  3.46it/s, accuracy=98.3, cache_hits=6e+4, loss=0.0167, running_loss=126, successful_cache_hits=0, total_images_trained=6e+4]
+Epoch[3/10]: 100%|██████████| 1875/1875 [09:04<00:00,  3.44it/s, accuracy=97.5, cache_hits=6e+4, loss=0.042, running_loss=125, successful_cache_hits=18208, total_images_trained=41792]
+Epoch[4/10]: 100%|██████████| 1875/1875 [09:19<00:00,  3.35it/s, accuracy=98.4, cache_hits=6e+4, loss=0.00279, running_loss=70, successful_cache_hits=0, total_images_trained=6e+4]
+Epoch[5/10]: 100%|██████████| 1875/1875 [09:04<00:00,  3.44it/s, accuracy=97.5, cache_hits=6e+4, loss=0.0664, running_loss=84.8, successful_cache_hits=17866, total_images_trained=42134]
+Epoch[6/10]: 100%|██████████| 1875/1875 [09:45<00:00,  3.20it/s, accuracy=97.9, cache_hits=6e+4, loss=0.000746, running_loss=67.2, successful_cache_hits=18540, total_images_trained=41460]
+Epoch[7/10]: 100%|██████████| 1875/1875 [10:01<00:00,  3.12it/s, accuracy=98.8, cache_hits=6e+4, loss=0.00106, running_loss=45.3, successful_cache_hits=0, total_images_trained=6e+4]
+Epoch[8/10]: 100%|██████████| 1875/1875 [10:10<00:00,  3.07it/s, accuracy=98.6, cache_hits=6e+4, loss=0.00533, running_loss=32.7, successful_cache_hits=0, total_images_trained=6e+4]
+Epoch[9/10]: 100%|██████████| 1875/1875 [09:35<00:00,  3.26it/s, accuracy=98.1, cache_hits=6e+4, loss=0.00115, running_loss=50.4, successful_cache_hits=19647, total_images_trained=40353]
+Epoch[10/10]: 100%|██████████| 1875/1875 [09:51<00:00,  3.17it/s, accuracy=98.8, cache_hits=6e+4, loss=0.0132, running_loss=31.9, successful_cache_hits=0, total_images_trained=6e+4]
+Accuracy on train set: 99.685
+Accuracy on test set: 98.77
+
+========================================================================================================================
+                                                    RESULTS - April 1-3
+========================================================================================================================
+Batch Size>    ||    2048    ||     1024     ||     512     ||      256     ||     128      ||      64      || 
+Epochs         ||            ||              ||             ||              ||              ||              ||    
+1   Vanilla    ||21.16699218 ||12.6193576    ||26.19243421  ||96.304086     ||93.26923076   ||97.475961     ||
+    Cached     ||32.20214    ||25.5859       ||80.50986     ||14.853766     ||88.15104      ||69.1105769    ||
+=========================================================================================================================
+2   Vanilla    ||62.26806640 ||38.7912326    ||89.206414    ||97.966746     ||94.6915064    ||97.936698     ||
+    Cached     ||59.362792   ||54.806857     ||87.263569    ||20.923477     ||83.283253     ||75.3605769    ||
+=========================================================================================================================
+3   Vanilla    ||87.036132   ||85.1453993    ||93.050986    ||98.187099     ||95.723157     ||98.347355     ||
+    Cached     ||73.71826    ||64.7135416    ||89.987664    ||44.851762     ||94.230769     ||72.946714     ||
+=========================================================================================================================
+4   Vanilla    ||90.722656   ||84.3532986    ||94.037828    ||98.23717      ||96.133814     ||98.507612     ||
+    Cached     ||78.6376953  ||69.5855034    ||95.1274671   ||63.752003     ||93.780048     ||81.029647     ||
+=========================================================================================================================
+5   Vanilla    ||93.26171    ||91.11328      ||95.2508223   ||98.397435     ||96.4543269    ||98.507612     ||
+    Cached     ||88.854980   ||68.326822     ||93.924753    ||85.586939     ||96.374198     ||66.7668269    ||
+=========================================================================================================================
+6   Vanilla    ||93.94531    ||92.415364     ||95.5489309   ||98.477564     ||96.684695     ||98.367387     ||
+    Cached     ||85.83984375 ||72.775607     ||96.26850     ||91.195913     ||93.880208     ||73.127003     ||
+=========================================================================================================================
+7   Vanilla    ||94.677734   ||91.91623      ||96.0526315   ||98.647836     ||96.854967     ||98.4975961    ||
+    Cached     ||89.6850585  ||76.822916     ||94.9013157   ||91.636618     ||92.718349     ||80.2183493    ||
+=========================================================================================================================
+8   Vanilla    ||94.787597   ||93.402777     ||96.1451480   ||98.768028     ||96.995192     ||98.347355     ||
+    Cached     ||91.967773   ||76.768663     ||97.2347861   ||91.235977     ||86.828926     ||82.562099     ||
+=========================================================================================================================
+9   Vanilla    ||95.520019   ||94.129774     ||96.515213    ||98.808092     ||96.704727     ||98.57772435   ||
+    Cached     ||92.70019    ||81.6731770    ||95.9395559   ||93.078926     ||93.349358     ||79.617387     ||
+=========================================================================================================================
+10  Vanilla    ||95.629882   ||94.140625     ||96.648848    ||98.828125     ||97.185496     ||98.737980     ||
+    Cached     ||93.322753   ||78.90625      ||97.018914    ||95.512820     ||95.262419     ||79.6274038    ||
+=========================================================================================================================
+Final Train:   ||            ||              ||             ||              ||              ||              ||
+Vanilla        ||95.617254   ||94.0261314    ||97.048611    ||99.3823450    ||97.9734241    ||99.7632070    ||
+Cached         ||95.434570   ||78.577922     ||97.566105    ||95.7248263    ||95.536191     ||80.0593649    ||
+=========================================================================================================================
+Final Test:    ||            ||              ||             ||              ||              ||              ||
+Vanilla        ||93.881330   ||94.28168402   ||96.66940     ||98.828125     ||97.185496     ||98.737980     ||
+Cached         ||93.64013    ||78.797743055  ||96.95723     ||95.5328525    ||95.252403     ||79.637419     ||
+=========================================================================================================================
+
+
+============================Batch Size 2048=======================
+Accuracy after  1  epochs :  21.1669921875
+Accuracy after  2  epochs :  62.26806640625
+Accuracy after  3  epochs :  87.0361328125
+Accuracy after  4  epochs :  90.72265625
+Accuracy after  5  epochs :  93.26171875
+Accuracy after  6  epochs :  93.9453125
+Accuracy after  7  epochs :  94.677734375
+Accuracy after  8  epochs :  94.78759765625
+Accuracy after  9  epochs :  95.52001953125
+Accuracy after  10  epochs :  95.6298828125
+Accuracy on train set:
+Accuracy after  10  epochs :  95.61725484913794
+Accuracy on test set:
+Accuracy after  10  epochs :  95.4345703125
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 57344
+Total successful cache hits in 0 epoch are : 52839
+Accuracy after  1  epochs :  32.2021484375
+Total cache hits in 1 epoch are : 57344
+Total successful cache hits in 1 epoch are : 54090
+Accuracy after  2  epochs :  59.36279296875
+Total cache hits in 2 epoch are : 57344
+Total successful cache hits in 2 epoch are : 54146
+Accuracy after  3  epochs :  73.71826171875
+Total cache hits in 3 epoch are : 57344
+Total successful cache hits in 3 epoch are : 54224
+Accuracy after  4  epochs :  78.6376953125
+Total cache hits in 4 epoch are : 57344
+Total successful cache hits in 4 epoch are : 54192
+Accuracy after  5  epochs :  88.85498046875
+Total cache hits in 5 epoch are : 57344
+Total successful cache hits in 5 epoch are : 54235
+Accuracy after  6  epochs :  85.83984375
+Total cache hits in 6 epoch are : 57344
+Total successful cache hits in 6 epoch are : 54177
+Accuracy after  7  epochs :  89.68505859375
+Total cache hits in 7 epoch are : 57344
+Total successful cache hits in 7 epoch are : 54290
+Accuracy after  8  epochs :  91.9677734375
+Total cache hits in 8 epoch are : 57344
+Total successful cache hits in 8 epoch are : 54239
+Accuracy after  9  epochs :  92.7001953125
+Total cache hits in 9 epoch are : 57344
+Total successful cache hits in 9 epoch are : 54333
+Accuracy after  10  epochs :  93.32275390625
+Accuracy on train set:
+Accuracy after  10  epochs :  93.88133081896551
+Accuracy on test set:
+Accuracy after  10  epochs :  93.64013671875
+
+=============================================================================================================================
+
+==============================Batch Size 1024=========================
+Accuracy after  1  epochs :  12.61935763888889
+Accuracy after  2  epochs :  38.79123263888889
+Accuracy after  3  epochs :  85.14539930555556
+Accuracy after  4  epochs :  84.35329861111111
+Accuracy after  5  epochs :  91.11328125
+Accuracy after  6  epochs :  92.41536458333334
+Accuracy after  7  epochs :  91.91623263888889
+Accuracy after  8  epochs :  93.40277777777779
+Accuracy after  9  epochs :  94.12977430555556
+Accuracy after  10  epochs :  94.140625
+Accuracy on train set:
+Accuracy after  10  epochs :  94.02613146551724
+Accuracy on test set:
+Accuracy after  10  epochs :  94.28168402777779
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 58368
+Total successful cache hits in 0 epoch are : 53667
+Accuracy after  1  epochs :  25.5859375
+Total cache hits in 1 epoch are : 58368
+Total successful cache hits in 1 epoch are : 54571
+Accuracy after  2  epochs :  54.806857638888886
+Total cache hits in 2 epoch are : 58368
+Total successful cache hits in 2 epoch are : 54601
+Accuracy after  3  epochs :  64.71354166666666
+Total cache hits in 3 epoch are : 58368
+Total successful cache hits in 3 epoch are : 54539
+Accuracy after  4  epochs :  69.58550347222221
+Total cache hits in 4 epoch are : 58368
+Total successful cache hits in 4 epoch are : 54502
+Accuracy after  5  epochs :  68.32682291666666
+Total cache hits in 5 epoch are : 58368
+Total successful cache hits in 5 epoch are : 54581
+Accuracy after  6  epochs :  72.77560763888889
+Total cache hits in 6 epoch are : 58368
+Total successful cache hits in 6 epoch are : 54518
+Accuracy after  7  epochs :  76.82291666666666
+Total cache hits in 7 epoch are : 58368
+Total successful cache hits in 7 epoch are : 54627
+Accuracy after  8  epochs :  76.76866319444444
+Total cache hits in 8 epoch are : 58368
+Total successful cache hits in 8 epoch are : 54545
+Accuracy after  9  epochs :  81.67317708333334
+Total cache hits in 9 epoch are : 58368
+Total successful cache hits in 9 epoch are : 54598
+Accuracy after  10  epochs :  78.90625
+Accuracy on train set:
+Accuracy after  10  epochs :  78.5779229525862
+Accuracy on test set:
+Accuracy after  10  epochs :  78.79774305555556
+
+=========================================================================================================================
+
+=================Batch size 512======================
+
+Accuracy after  1  epochs :  26.192434210526315
+Accuracy after  2  epochs :  89.20641447368422
+Accuracy after  3  epochs :  93.05098684210526
+Accuracy after  4  epochs :  94.03782894736842
+Accuracy after  5  epochs :  95.25082236842105
+Accuracy after  6  epochs :  95.54893092105263
+Accuracy after  7  epochs :  96.05263157894737
+Accuracy after  8  epochs :  96.14514802631578
+Accuracy after  9  epochs :  96.51521381578947
+Accuracy after  10  epochs :  96.64884868421053
+Accuracy on train set:
+Accuracy after  10  epochs :  97.04861111111111
+Accuracy on test set:
+Accuracy after  10  epochs :  96.66940789473685
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 59392
+Total successful cache hits in 0 epoch are : 54833
+Accuracy after  1  epochs :  80.50986842105263
+Total cache hits in 1 epoch are : 59392
+Total successful cache hits in 1 epoch are : 55234
+Accuracy after  2  epochs :  87.26356907894737
+Total cache hits in 2 epoch are : 59392
+Total successful cache hits in 2 epoch are : 55297
+Accuracy after  3  epochs :  89.98766447368422
+Total cache hits in 3 epoch are : 59392
+Total successful cache hits in 3 epoch are : 55376
+Accuracy after  4  epochs :  95.12746710526315
+Total cache hits in 4 epoch are : 59392
+Total successful cache hits in 4 epoch are : 55337
+Accuracy after  5  epochs :  96.26850328947368
+Total cache hits in 5 epoch are : 59392
+Total successful cache hits in 5 epoch are : 55378
+Accuracy after  6  epochs :  93.92475328947368
+Total cache hits in 6 epoch are : 59392
+Total successful cache hits in 6 epoch are : 55409
+Accuracy after  7  epochs :  94.90131578947368
+Total cache hits in 7 epoch are : 59392
+Total successful cache hits in 7 epoch are : 55360
+Accuracy after  8  epochs :  97.23478618421053
+Total cache hits in 8 epoch are : 59392
+Total successful cache hits in 8 epoch are : 55369
+Accuracy after  9  epochs :  95.93955592105263
+Total cache hits in 9 epoch are : 59392
+Total successful cache hits in 9 epoch are : 55401
+Accuracy after  10  epochs :  97.01891447368422
+Accuracy on train set:
+Accuracy after  10  epochs :  97.56610576923077
+Accuracy on test set:
+Accuracy after  10  epochs :  96.95723684210526
+=========================================================================================================================
+==========================Batch Size 256===================================
+Accuracy after  1  epochs :  96.30408653846155
+Accuracy after  2  epochs :  97.9667467948718
+Accuracy after  3  epochs :  98.18709935897436
+Accuracy after  4  epochs :  98.23717948717949
+Accuracy after  5  epochs :  98.3974358974359
+Accuracy after  6  epochs :  98.4775641025641
+Accuracy after  7  epochs :  98.64783653846155
+Accuracy after  8  epochs :  98.76802884615384
+Accuracy after  9  epochs :  98.80809294871796
+Accuracy after  10  epochs :  98.828125
+Accuracy on train set:
+Accuracy after  10  epochs :  99.38234508547008
+Accuracy on test set:
+Accuracy after  10  epochs :  98.828125
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 59648
+Total successful cache hits in 0 epoch are : 55238
+Accuracy after  1  epochs :  14.853766025641027
+Total cache hits in 1 epoch are : 59648
+Total successful cache hits in 1 epoch are : 55388
+Accuracy after  2  epochs :  20.923477564102562
+Total cache hits in 2 epoch are : 59648
+Total successful cache hits in 2 epoch are : 55398
+Accuracy after  3  epochs :  44.85176282051282
+Total cache hits in 3 epoch are : 59648
+Total successful cache hits in 3 epoch are : 55370
+Accuracy after  4  epochs :  63.752003205128204
+Total cache hits in 4 epoch are : 59648
+Total successful cache hits in 4 epoch are : 55379
+Accuracy after  5  epochs :  85.5869391025641
+Total cache hits in 5 epoch are : 59648
+Total successful cache hits in 5 epoch are : 55375
+Accuracy after  6  epochs :  91.19591346153845
+Total cache hits in 6 epoch are : 59648
+Total successful cache hits in 6 epoch are : 55340
+Accuracy after  7  epochs :  91.63661858974359
+Total cache hits in 7 epoch are : 59648
+Total successful cache hits in 7 epoch are : 55291
+Accuracy after  8  epochs :  91.23597756410257
+Total cache hits in 8 epoch are : 59648
+Total successful cache hits in 8 epoch are : 55431
+Accuracy after  9  epochs :  93.07892628205127
+Total cache hits in 9 epoch are : 59648
+Total successful cache hits in 9 epoch are : 55396
+Accuracy after  10  epochs :  95.51282051282051
+Accuracy on train set:
+Accuracy after  10  epochs :  95.72482638888889
+Accuracy on test set:
+Accuracy after  10  epochs :  95.53285256410257
+
+=========================================================================================================================
+Accuracy after  1  epochs :  93.26923076923077
+Accuracy after  2  epochs :  94.69150641025641
+Accuracy after  3  epochs :  95.72315705128204
+Accuracy after  4  epochs :  96.1338141025641
+Accuracy after  5  epochs :  96.45432692307693
+Accuracy after  6  epochs :  96.68469551282051
+Accuracy after  7  epochs :  96.85496794871796
+Accuracy after  8  epochs :  96.9951923076923
+Accuracy after  9  epochs :  96.70472756410257
+Accuracy after  10  epochs :  97.1854967948718
+Accuracy on train set:
+Accuracy after  10  epochs :  97.97342414529915
+Accuracy on test set:
+Accuracy after  10  epochs :  97.1854967948718
+======================================Training using cache=======================================
+
+Total cache hits in 0 epoch are : 59776
+Total successful cache hits in 0 epoch are : 55327
+Accuracy after  1  epochs :  88.15104166666666
+Total cache hits in 1 epoch are : 59776
+Total successful cache hits in 1 epoch are : 55443
+Accuracy after  2  epochs :  83.2832532051282
+Total cache hits in 2 epoch are : 59776
+Total successful cache hits in 2 epoch are : 55468
+Accuracy after  3  epochs :  94.23076923076923
+Total cache hits in 3 epoch are : 59776
+Total successful cache hits in 3 epoch are : 55446
+Accuracy after  4  epochs :  93.78004807692307
+Total cache hits in 4 epoch are : 59776
+Total successful cache hits in 4 epoch are : 55528
+Accuracy after  5  epochs :  96.37419871794873
+Total cache hits in 5 epoch are : 59776
+Total successful cache hits in 5 epoch are : 55396
+Accuracy after  6  epochs :  93.88020833333334
+Total cache hits in 6 epoch are : 59776
+Total successful cache hits in 6 epoch are : 55568
+Accuracy after  7  epochs :  92.71834935897436
+Total cache hits in 7 epoch are : 59776
+Total successful cache hits in 7 epoch are : 55458
+Accuracy after  8  epochs :  86.82892628205127
+Total cache hits in 8 epoch are : 59776
+Total successful cache hits in 8 epoch are : 55507
+Accuracy after  9  epochs :  93.34935897435898
+Total cache hits in 9 epoch are : 59776
+Total successful cache hits in 9 epoch are : 55480
+Accuracy after  10  epochs :  95.26241987179486
+Accuracy on train set:
+Accuracy after  10  epochs :  95.53619123931624
+Accuracy on test set:
+Accuracy after  10  epochs :  95.25240384615384
+
+=========================================================================================================================
+===================================Batch Size 64======================================
+Accuracy after  1  epochs :  97.42588141025641
+Accuracy after  2  epochs :  98.22716346153845
+Accuracy after  3  epochs :  98.57772435897436
+Accuracy after  4  epochs :  98.72796474358975
+Accuracy after  5  epochs :  98.64783653846155
+Accuracy after  6  epochs :  98.85817307692307
+Accuracy after  7  epochs :  98.77804487179486
+Accuracy after  8  epochs :  98.65785256410257
+Accuracy after  9  epochs :  98.56770833333334
+Accuracy after  10  epochs :  98.85817307692307
+Accuracy on train set:
+Accuracy after  10  epochs :  99.54475720384205
+Accuracy on test set:
+Accuracy after  10  epochs :  98.85817307692307
+Total cache hits in 0 epoch are : 59904
+Total successful cache hits in 0 epoch are : 55378
+Accuracy after  1  epochs :  69.11057692307693
+Total cache hits in 1 epoch are : 59904
+Total successful cache hits in 1 epoch are : 55523
+Accuracy after  2  epochs :  75.36057692307693
+Total cache hits in 2 epoch are : 59904
+Total successful cache hits in 2 epoch are : 55480
+Accuracy after  3  epochs :  72.94671474358975
+Total cache hits in 3 epoch are : 59904
+Total successful cache hits in 3 epoch are : 55415
+Accuracy after  4  epochs :  81.02964743589743
+Total cache hits in 4 epoch are : 59904
+Total successful cache hits in 4 epoch are : 55351
+Accuracy after  5  epochs :  66.76682692307693
+Total cache hits in 5 epoch are : 59904
+Total successful cache hits in 5 epoch are : 55388
+Accuracy after  6  epochs :  73.1270032051282
+Total cache hits in 6 epoch are : 59904
+Total successful cache hits in 6 epoch are : 55531
+Accuracy after  7  epochs :  80.21834935897436
+Total cache hits in 7 epoch are : 59904
+Total successful cache hits in 7 epoch are : 55350
+Accuracy after  8  epochs :  82.56209935897436
+Total cache hits in 8 epoch are : 59904
+Total successful cache hits in 8 epoch are : 55384
+Accuracy after  9  epochs :  79.61738782051282
+Total cache hits in 9 epoch are : 59904
+Total successful cache hits in 9 epoch are : 55422
+Accuracy after  10  epochs :  79.62740384615384
+Accuracy on train set:
+Accuracy after  10  epochs :  80.05936499466382
+Accuracy on test set:
+Accuracy after  10  epochs :  79.63741987179486
+=========================================================================================================================

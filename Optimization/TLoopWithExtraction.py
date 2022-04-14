@@ -58,15 +58,9 @@ class TLoopWithExtraction():
             optimizer = torch.optim.SGD(model.parameters(), learning_rate)
 
         loss_values = []
-        # count_dictionary = torch.zeros((10,1))   # this np array is used to store count of each class images that we got so far
-        # vector_dictionary = torch.zeros((10,30)) # this is the vector cache that is used to store the latest cahced object for each class
-        # threshold_dictionary = torch.zeros((10,1)) # this is used to store the threshold fo each class to obtain cache hit or miss
+
         for epoch in range(epochs):
             running_loss = 0
-            feature_cache = []
-            label_cache = []
-            feature_cachearr = None
-            label_cachearr = None
             cache_hits = 0
             successfull_cache_hits = 0
             batch_counter = 0
@@ -82,12 +76,14 @@ class TLoopWithExtraction():
                 batch_counter +=1
                 # if feature cache is not empty than do cosine similarity check
                 if (count_dictionary[0].item() != 0):
-                    # print("Current Batch is {} and fmap count is {}".format(batch_counter,len(feature_cachearr)))
                     # first get feature maps for new batch from model trained weights till now
                         with torch.no_grad():
                             feature_extractor = create_feature_extractor(model, return_nodes=[firstlayername])
                             newBatchFeatureMaps = feature_extractor(images)
+
+                            #below fucntion is used to extract feature maps
                             newBatchVectors = TLoopWithExtraction.getcurrentbatchVectors(newBatchFeatureMaps,firstlayername)
+
                             # now we have feature maps of new batch and feature maps cache so far to perform cosine similarity check
                             Z_norm = torch.linalg.norm(newBatchVectors, dim=1, keepdim=True)  # Size (n, 1).
                             B_norm = torch.linalg.norm(vector_dictionary, dim=1, keepdim=True)  # Size (1, b).
@@ -130,6 +126,9 @@ class TLoopWithExtraction():
                             # label_cachearr = []
                 else:
                     totalimagessentfortraining+=len(images)
+
+                #training model with new batch
+
                 # forward pass
                 outputs = model(images)
                 # finding loss
@@ -138,18 +137,14 @@ class TLoopWithExtraction():
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+
                 with torch.no_grad():
-                    # extract feature maps of the batch and stack it to cache stack
+                    # Below method is used to extract feature maps after training and caching them
+                    #also used to set the threshold
                     feature_extractor = create_feature_extractor(model, return_nodes=[firstlayername])
                     out = feature_extractor(images)
                     vector_dictionary,count_dictionary,threshold_dictionary = TLoopWithExtraction.getfeatureVector(out,labels,count_dictionary,vector_dictionary,threshold_dictionary,firstlayername,out_params)
-                    # feature_cachearr =  torch.sum(out['conv1'].flatten(start_dim=2, end_dim=3), 1)
-                    # label_cachearr = labels
-                    # stacking tensor to concatenate
-                    # feature_cachearr = torch.cat(feature_cache)
-                    # feature_cachearr = torch.reshape(feature_cachearr, (
-                    # feature_cachearr.size()[0] * feature_cachearr.size()[1], feature_cachearr.size()[2]))
-                    # label_cachearr = torch.cat(label_cache).flatten()
+
                 running_loss += loss.item()
                 # evaluation of model on test data
                 if batch_idx %10 == 0 or batch_counter == len(train_loader):

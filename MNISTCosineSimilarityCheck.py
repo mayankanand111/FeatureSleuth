@@ -14,6 +14,10 @@ from Research.DataAnalysis import LoadData
 cs = ConfigStore.instance()
 cs.store(name="mnsit_config", node=MNISTConfig)
 
+# This file is used to check accelerated learing process in MNIST dataset
+#This file first train same model with whole dataset around 50,000 training data using simple tring in batches method
+#after that training it runs the new model object on same Dataset using caching techniques
+#for caching logic check file TLoopWithExtraction with method Tloop_Extraction
 
 @hydra.main(config_path="Conf", config_name="DataConfig")
 def main(cfg: MNISTConfig) -> None:
