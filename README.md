@@ -13,4 +13,5 @@ Appeneded results in "Experiment-FeatureMapTraining.txt"
 
 
 Paper Added:
-https://github.com/mayankanand111/FeatureSleuth/blob/main/Understanding_and_expediting_learning_in_Convolution_Neural.pdf
+[embed]https://github.com/mayankanand111/FeatureSleuth/blob/main/Understanding_and_expediting_learning_in_Convolution_Neural.pdf[/embed]
+
